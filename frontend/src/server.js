@@ -1,22 +1,9 @@
+// --- Importar App/express ---
+const app = require("./app");
 
-# Dependencias de Node.js
-node_modules/
+// --- PUERTO ---
+const PORT = process.env.PORT || 3000;
 
-# Variables de entorno y secretos
-.env*
-!.env.example
-
-# Logs
-*.log
-npm-debug.log*
-
-# Resultados generados
-coverage/
-dist/
-
-# Archivos temporales de Windows
-Thumbs.db
-Desktop.ini
-
-# Archivos del sistema macOS
-.DS_Store
+app.listen(PORT, () => {
+    console.log(`Tienda online: http://localhost:${PORT}`);
+});
