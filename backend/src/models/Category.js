@@ -1,6 +1,22 @@
 const mongoose = require("mongoose");
 
 
+// -------------------------------------------------------------------------
+// MIDDLEWARE: GENERAR SLUG AUTOMÁTICAMENTE ANTES DE GUARDAR LA CATEGORÍA
+// -------------------------------------------------------------------------
+const generateSlug = (text) => {
+
+    return text
+        .normalize("NFD")                // Separar letra de su acento
+        .replace(/[\u0300-\u036f]/g, "") // Elimina tildes
+        .toLowerCase()                   // Minusculas
+        .trim()                          // Eliminar Espacios inicio-fin
+        .replace(/[^a-z0-9]+/g, "-")     // Reemplaza espacios y símbolos
+        .replace(/^-+|-+$/g, "");        // Elimina guiones de los extremos
+
+}
+
+
 const categorySchema = new mongoose.Schema({
 
     name: {
@@ -19,8 +35,8 @@ const categorySchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        trim: false,
-        maxlengthth: [250, "La descripcion de la categoria no puede exceder los 250 caracteres"]
+        trim: true,
+        maxlength: [250, "La descripcion de la categoria no puede exceder los 250 caracteres"]
     },
     isActive: {
         type: Boolean,
@@ -29,6 +45,20 @@ const categorySchema = new mongoose.Schema({
 }, {
     timestamps: true // "createdAt" y "updatedAt"
 });
+
+
+// --- Generar Slug Antes De Validar ---
+categorySchema.pre("validate", function (){
+
+    // --- Si Fue Modificada O No Tiene Slung --
+    if (this.isModified("name") || !this.slug) {
+
+        // --- Limpiar y generar Slung ---
+        this.slug = generateSlug(this.name || "");
+
+    }
+});
+
 
 const Category = mongoose.model('Category', categorySchema);
 
