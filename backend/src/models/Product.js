@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
         trim: true, // Elimina espacios en blanco al inicio y final
         maxlength: [150, "El nombre no puede exceder los 150 caracteres"]
     },
-    descripcion: {
+    description: {
         type: String,
         required: [true, "La descripcion es obligatoria"],
         trim: true,
@@ -38,7 +38,7 @@ const productSchema = new mongoose.Schema({
         ref: 'Category', // Referencia a otro modelo de Categorias
         required: [true, "la categoria es obligatoria"]
     },
-    images: [{
+    images: {
         type: [{ 
             type: String, // Array de URLs de las imagenes del producto
             trim: true
@@ -46,13 +46,11 @@ const productSchema = new mongoose.Schema({
         default: [],      
         validate: {  // validar que haya imagenes cargadas 
             validator: function (images) {
-                return images.every(
-                    image => image.length > 0
-                );
+                return images.every(image => image.length > 0);
             },
             message: "Las URLs de las imagenes no pueden estar vacias"
         }
-    }],
+    },
     isActive: {
         type: Boolean,
         default: true // Permite "desactivar" productos sin borrarlos de la BD
