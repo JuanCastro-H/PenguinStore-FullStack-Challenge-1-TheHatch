@@ -16,5 +16,8 @@ app.get("/health", (req, res) => {
 const categoryRoutes = require("./routes/categoryRoutes");
 app.use("/categories", categoryRoutes);
 
+const productRoutes = require("./routes/productRoutes");
+app.use("/products", productRoutes);
+
 // --- Exportar Modulo ---
 module.exports = app;
