@@ -204,3 +204,16 @@ test("PUT /products/:id — devuelve 404 si el producto no existe", async () => 
     // - Verificar Que Devuelve El Error Correcto -
     assert.equal(response.status, 404);
 });
+
+
+// --- PRUEBA 10: INTENTAR ELIMINAR UN PRODUCTO INEXISTENTE ---
+test("DELETE /products/:id — devuelve 404 si el producto no existe", async () => {
+    // - Generar ID aleatorio -
+    const id = new mongoose.Types.ObjectId();
+
+    // - Peticion Para Intentar Eliminar Un Producto Con Ese ID -
+    const response = await request(app).delete(`/products/${id}`);
+
+    // - Verificar Que Devuelve El Error Correcto -
+    assert.equal(response.status, 404);
+});
