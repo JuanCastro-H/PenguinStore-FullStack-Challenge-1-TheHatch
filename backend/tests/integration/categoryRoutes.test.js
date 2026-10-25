@@ -125,3 +125,15 @@ test("GET /categories/:id — devuelve 404 si la categoría no existe", async ()
     // - Verifiacar Error -
     assert.equal(response.status, 404);
 });
+
+
+// --- PRUEBA 7: FALTA EL CAMPO NOMBRE AL CREAR UNA CATEGORIA ---
+test("POST /categories — devuelve 400 si falta el nombre", async () => {
+    // - Crear Categoria Sin Pasarle Nombre"
+    const response = await request(app)
+        .post("/categories")
+        .send({});
+
+    // - Verificar Que Devuelve El Error Correcto -
+    assert.equal(response.status, 400);
+});
