@@ -189,3 +189,18 @@ test("GET /products/:id — devuelve 400 si el ID es inválido", async () => {
     // - Verificar Que Devuelve El Error Correcto -
     assert.equal(response.status, 400);
 });
+
+
+// --- PRUEBA 9: ACTUALIZAR UN PRODUCTO INEXISTENTE ---
+test("PUT /products/:id — devuelve 404 si el producto no existe", async () => {
+    // - Generar ID aleatorio -
+    const id = new mongoose.Types.ObjectId();
+
+    // - Solicitar Actualizar Un Producto Con Ese ID -
+    const response = await request(app)
+        .put(`/products/${id}`)
+        .send({ name: "Producto inexistente" });
+    
+    // - Verificar Que Devuelve El Error Correcto -
+    assert.equal(response.status, 404);
+});
