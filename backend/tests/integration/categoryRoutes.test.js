@@ -44,4 +44,19 @@ test("POST /categories — crea una categoría y devuelve 201", async () => {
 });
 
 
+// --- PRUEBA 2: OBTENER LISTA DE CATEGORIAS ---
+test("GET /categories — devuelve la lista de categorías", async () => {
+    // - Insertar una cateogoria -
+    await Category.create({ name: "Categoría para listar" });
+
+    // - Petion HTTP Para Obtener Lista De Categorias -
+    const response = await request(app).get("/categories");
+
+    // - Verificaciones ---
+    assert.equal(response.status, 200);                       // Respuesta positiva
+    assert.ok(Array.isArray(response.body));                  // Que devuelta una lista/array
+    assert.ok(response.body.some(                             // Categoria ingresada este
+        category => category.name === "Categoría para listar"
+    ));
+});
 
