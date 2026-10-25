@@ -93,3 +93,22 @@ test("PUT /categories/:id — actualiza una categoría existente", async () => {
     assert.equal(response.status, 200);                     // Respuesta positiva
     assert.equal(response.body.name, "Nombre actualizado"); // Name Actualizado
 });
+
+
+// --- PRUEBA 5: ELIMINAR CATEGORIA POR ID ---
+test("DELETE /categories/:id — elimina una categoría existente", async () => {
+    // - Guardar Categoria De Prueba -
+    const category = await Category.create({
+        name: "Categoría para eliminar"
+    });
+
+    // - Hacer Solicitud Para Eliminarla ---
+    const response = await request(app).delete(`/categories/${category._id}`);
+
+    // - Verificaciones -
+    assert.equal(response.status, 200);        // Respuesta positiva
+    assert.equal(                              // Verificar Eliminacion
+        await Category.findById(category._id),
+        null
+    );
+});
