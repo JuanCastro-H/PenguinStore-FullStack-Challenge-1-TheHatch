@@ -181,3 +181,11 @@ test("POST /products — devuelve 400 si faltan campos obligatorios", async () =
 });
 
 
+// --- PRUEBA 8: UTILIZAR FORMATO DE ID INVALIDO ---
+test("GET /products/:id — devuelve 400 si el ID es inválido", async () => {
+    // - Solicitar Producto Con Id Invalido -
+    const response = await request(app).get("/products/id-invalido");
+
+    // - Verificar Que Devuelve El Error Correcto -
+    assert.equal(response.status, 400);
+});
