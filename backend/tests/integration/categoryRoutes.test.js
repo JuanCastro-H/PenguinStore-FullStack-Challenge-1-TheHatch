@@ -60,3 +60,18 @@ test("GET /categories — devuelve la lista de categorías", async () => {
     ));
 });
 
+
+// --- PRUEBA 3: OBTENER CATEGORIA POR ID ---
+test("GET /categories/:id — devuelve una categoría existente", async () => {
+    // - Guardar Categoria En La BD -
+    const category = await Category.create({
+        name: "Categoría individual"
+    });
+
+    // - Buscar Categoria Por Su ID -
+    const response = await request(app).get(`/categories/${category._id}`);
+
+    // - Verificaciones -
+    assert.equal(response.status, 200);           // Respuesta postiva
+    assert.equal(response.body._id, category.id); // Checar que ID obtenido Y de la categoria coincidan
+});
