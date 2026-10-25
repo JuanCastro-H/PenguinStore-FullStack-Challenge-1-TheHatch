@@ -149,15 +149,27 @@ test("GET /categories/:id — devuelve 400 si el ID es inválido", async () => {
 });
 
 
-// --- PRUEBA 9: BUSCAR UNA CATEGORIA QUE NO EXISTE ---
+// --- PRUEBA 9: ACTUALIZAR UNA CATEGORIA QUE NO EXISTE ---
 test("PUT /categories/:id — devuelve 404 si la categoría no existe", async () => {
     // - Generar ID Aleatorio -
     const id = new mongoose.Types.ObjectId();
 
-    // - Hacer La Solicitud De Una Categoria Con Ese ID ---
     const response = await request(app)
+    // - Hacer La Solicitud De Actualización De Una Categoria Con Ese ID ---
         .put(`/categories/${id}`)
         .send({ name: "Categoría inexistente" });
+
+    // - Verificar Que Devuelve El Error Correcto -
+    assert.equal(response.status, 404);
+});
+
+// --- PRUEBA 10: BUSCAR UNA CATEGORIA QUE NO EXISTE ---
+test("DELETE /categories/:id — devuelve 404 si la categoría no existe", async () => {
+    // - Generar ID Aleatorio -
+    const id = new mongoose.Types.ObjectId();
+
+    // - Solicitar Una Categoria Con Ese ID -
+    const response = await request(app).delete(`/categories/${id}`);
 
     // - Verificar Que Devuelve El Error Correcto -
     assert.equal(response.status, 404);
