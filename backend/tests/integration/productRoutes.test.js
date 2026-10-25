@@ -167,3 +167,17 @@ test("GET /products/:id — devuelve 404 si el producto no existe", async () => 
     // - Verificar Error -
     assert.equal(response.status, 404);
 });
+
+
+// --- PRUEBA 7: FALTAN CAMPOS OBLIGATORIOS ---
+test("POST /products — devuelve 400 si faltan campos obligatorios", async () => {
+    // - Crear Producto Sin Campos Obligatorios -
+    const response = await request(app)
+        .post("/products")
+        .send({}); 
+
+    // - Verificar Que Devuelve El Error Correcto -
+    assert.equal(response.status, 400);
+});
+
+
