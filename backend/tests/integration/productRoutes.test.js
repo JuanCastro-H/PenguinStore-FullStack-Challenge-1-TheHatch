@@ -154,3 +154,16 @@ test("DELETE /products/:id — elimina un producto existente", async () => {
     assert.equal(response.status, 200);                        // Respuesta positiva
     assert.equal(await Product.findById(product._id), null);   // Confirmar eliminacion
 });
+
+
+// --- PRUEBA 6: BUSCAR UN PRODUCTO INEXISTENTE POR ID ---
+test("GET /products/:id — devuelve 404 si el producto no existe", async () => {
+    // - Crear ID Aleatorio -
+    const id = new mongoose.Types.ObjectId();
+
+    // - Solicitar Un Producto Por Esa ID -
+    const response = await request(app).get(`/products/${id}`);
+    
+    // - Verificar Error -
+    assert.equal(response.status, 404);
+});
