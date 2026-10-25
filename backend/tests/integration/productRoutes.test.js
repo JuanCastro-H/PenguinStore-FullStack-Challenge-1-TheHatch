@@ -63,3 +63,30 @@ test("POST /products — crea un producto y devuelve 201", async () => {
 });
 
 
+// --- PRUEBA 2: OBTENER LISTA DE PRODUCTOS ---
+test("GET /products — devuelve los productos y sus categorías", async () => {
+    // - Crear Producto -
+    await Product.create({
+        name: "Producto para listar",
+        description: "Descripción de prueba",
+        price: 150,
+        stock: 10,
+        category: category._id
+    });
+
+    // - Peticion HTTP Para Obtener Lista De Productos -
+    const response = await request(app).get("/products");
+
+    // - Verificaciones -
+    assert.equal(response.status, 200);      // Respuesta positiva
+    assert.ok(Array.isArray(response.body)); // Lista de productos
+
+    // - Buscar Producto Creado En La Lista -
+    const product = response.body.find(
+        item => item.name === "Producto para listar"
+    );
+
+    // - Verificaciones extras -
+    assert.ok(product);                                                 // Se obtuvo el producto
+    assert.equal(product.category.name, "Categoría de productos HTTP"); // Si su categoria coincide
+});
