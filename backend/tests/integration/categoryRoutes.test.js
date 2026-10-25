@@ -137,3 +137,13 @@ test("POST /categories — devuelve 400 si falta el nombre", async () => {
     // - Verificar Que Devuelve El Error Correcto -
     assert.equal(response.status, 400);
 });
+
+
+// --- PRUEBA 8: ENVIAR FORMATO DE ID INVALIDO ---
+test("GET /categories/:id — devuelve 400 si el ID es inválido", async () => {
+    // - Hacer Solicitud Con Id Invalido -
+    const response = await request(app).get("/categories/id-invalido");
+
+    // - Verificar Que Devuelve El Error Correcto -
+    assert.equal(response.status, 400);
+});
