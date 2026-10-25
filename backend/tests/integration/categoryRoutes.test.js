@@ -112,3 +112,16 @@ test("DELETE /categories/:id — elimina una categoría existente", async () => 
         null
     );
 });
+
+
+// --- PRUEBA 6: ID DE CATEGORIA NO EXISTE ---
+test("GET /categories/:id — devuelve 404 si la categoría no existe", async () => {
+    // - Generar ID Aleatorio -
+    const id = new mongoose.Types.ObjectId();
+
+    // - Buscar Categoria Inexistente Con Ese ID -
+    const response = await request(app).get(`/categories/${id}`);
+
+    // - Verifiacar Error -
+    assert.equal(response.status, 404);
+});
