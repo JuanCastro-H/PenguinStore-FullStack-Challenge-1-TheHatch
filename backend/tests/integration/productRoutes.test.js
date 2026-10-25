@@ -90,3 +90,25 @@ test("GET /products — devuelve los productos y sus categorías", async () => {
     assert.ok(product);                                                 // Se obtuvo el producto
     assert.equal(product.category.name, "Categoría de productos HTTP"); // Si su categoria coincide
 });
+
+
+// --- PRUEBA 3: OBTENER UN PRODUCTO POR SU ID ---
+test("GET /products/:id — devuelve un producto existente", async () => {
+    // - Crear Producto -
+    const product = await Product.create({
+        name: "Producto individual",
+        description: "Consulta por ID",
+        price: 200,
+        stock: 3,
+        category: category._id
+    });
+
+    // - Peticion HTTP Para Buscarlo Por Su ID -
+    const response = await request(app).get(`/products/${product._id}`);
+
+    // - Verificaciones -
+    assert.equal(response.status, 200);                                        // Respuesta positiva
+    assert.equal(response.body._id, product.id);                               // Coinciden los ID
+    assert.equal(response.body.name, "Producto individual");                   // Name del producto correcto
+    assert.equal(response.body.category.name, "Categoría de productos HTTP");  // Categoria correcta
+});
