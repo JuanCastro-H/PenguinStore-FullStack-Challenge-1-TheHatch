@@ -75,3 +75,21 @@ test("GET /categories/:id — devuelve una categoría existente", async () => {
     assert.equal(response.status, 200);           // Respuesta postiva
     assert.equal(response.body._id, category.id); // Checar que ID obtenido Y de la categoria coincidan
 });
+
+
+// --- PRUEBA 4: ACTUALIZAR CATEGORIA POR ID ---
+test("PUT /categories/:id — actualiza una categoría existente", async () => {
+    // - Guardar Categoria De Prueba -
+    const category = await Category.create({
+        name: "Nombre anterior"
+    });
+
+    // - Hacer Solititud Para Actualizar El Nombre -
+    const response = await request(app)
+        .put(`/categories/${category._id}`)
+        .send({ name: "Nombre actualizado" });
+
+    // - Verificaciones -
+    assert.equal(response.status, 200);                     // Respuesta positiva
+    assert.equal(response.body.name, "Nombre actualizado"); // Name Actualizado
+});
