@@ -134,3 +134,23 @@ test("PUT /products/:id — actualiza un producto existente", async () => {
     assert.equal(response.status, 200);                      // Respuesta Positiva
     assert.equal(response.body.name, "Nombre actualizado");  // Name actualizado
 });
+
+
+// --- PRUEBA 5: ELIMINAR UN PRODUCTO POR SU ID ---
+test("DELETE /products/:id — elimina un producto existente", async () => {
+    // - Crear Producto -
+    const product = await Product.create({
+        name: "Producto para eliminar",
+        description: "Prueba de eliminación",
+        price: 50,
+        stock: 2,
+        category: category._id
+    });
+
+    // - Peticion HTTP Para Eliminarlo El Producto -
+    const response = await request(app).delete(`/products/${product._id}`);
+
+    // - Verificaciones
+    assert.equal(response.status, 200);                        // Respuesta positiva
+    assert.equal(await Product.findById(product._id), null);   // Confirmar eliminacion
+});
