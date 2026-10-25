@@ -112,3 +112,25 @@ test("GET /products/:id — devuelve un producto existente", async () => {
     assert.equal(response.body.name, "Producto individual");                   // Name del producto correcto
     assert.equal(response.body.category.name, "Categoría de productos HTTP");  // Categoria correcta
 });
+
+
+// --- PRUEBA 4: ACTUALIZAR UN PRODCUTO POR SU ID ---
+test("PUT /products/:id — actualiza un producto existente", async () => {
+    // - Crear Producto -
+    const product = await Product.create({
+        name: "Nombre anterior",
+        description: "Descripción original",
+        price: 200,
+        stock: 3,
+        category: category._id
+    });
+
+    // - Peticion HTTP Para Actualizar Nombre Del Producto -
+    const response = await request(app)
+        .put(`/products/${product._id}`)
+        .send({ name: "Nombre actualizado" });
+
+    // - Verificaiones -
+    assert.equal(response.status, 200);                      // Respuesta Positiva
+    assert.equal(response.body.name, "Nombre actualizado");  // Name actualizado
+});
