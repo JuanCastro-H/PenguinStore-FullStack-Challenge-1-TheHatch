@@ -217,3 +217,25 @@ test("DELETE /products/:id — devuelve 404 si el producto no existe", async () 
     // - Verificar Que Devuelve El Error Correcto -
     assert.equal(response.status, 404);
 });
+
+
+// --- PRUEBA 11: INTENTAR CREAR PRODUCTO CON CATEGORÍA INEXISTENTEtest("POST /products — rechaza una categoría inexistente", async () => {
+test("POST /products — rechaza una categoría inexistente", async () => {
+
+    // - Crear ID Aleatorio -
+    const invalidCategoryId = new mongoose.Types.ObjectId();
+
+    // - Intentar Crear Producto -
+    const response = await request(app)
+        .post("/products")
+        .send({
+            name: "Producto sin categoría válida",
+            description: "Prueba de integridad",
+            price: 100,
+            stock: 5,
+            category: invalidCategoryId
+        });
+
+    // - Verificar Error -
+    assert.equal(response.status, 400);
+});
