@@ -1,6 +1,9 @@
 // --- Importar Schema De Producto ---
 const Product = require("../models/Product");
 
+// --- Importar Schema De Categoria ---
+const Category = require("../models/Category");
+
 
 // ====================================
 // CONTROLADOR DE ACCIONES 
@@ -9,6 +12,7 @@ const Product = require("../models/Product");
 
 // GET /products — Listar productos
 const getProducts = async (req, res) => {
+
     try { // Cambiar ID De Categoria Por Nombre De Categoria
         const products = await Product.find().populate("category");
         res.status(200).json(products);
@@ -20,6 +24,7 @@ const getProducts = async (req, res) => {
 
 // GET /products/:id — Obtener un producto por ID
 const getProductById = async (req, res) => {
+
     try { //  Obtener Producto Por ID Y Info De Su Categoria 
         const product = await Product.findById(req.params.id)
             .populate("category");
@@ -37,6 +42,17 @@ const getProductById = async (req, res) => {
 
 // POST /products — Crear producto
 const createProduct = async (req, res) => {
+
+    // - Obtener Categoria -
+    const category = await Category.findById(req.body.category);
+
+    // - Verificar Que Existe -
+    if (!category) {
+        return res.status(400).json({
+            error: "La categoría indicada no existe"
+        });
+    }
+
     try { // Obtener Datos Del Producto Y Crearlo
         const product = await Product.create(req.body);
           // Agregarle Su Categoria
@@ -55,24 +71,47 @@ const createProduct = async (req, res) => {
 
 // PUT /products/:id — Actualizar producto
 const updateProduct = async (req, res) => {
-    try { // Busca El Producto Por Su ID Y Actualiza Sus Campos
+
+    try { 
+
+        // - Verificar SI Se Proporciona Una Categoria
+        if (req.body.category !== undefined ) {
+
+            // - Obtener Categoria -
+            const category = await Category.findById(req.body.category);
+            
+            // - Verificar Que Existe -
+            if (!category) {
+                return res.status(400).json({
+                    error: "La categoría indicada no existe"
+                });
+            }
+
+        }
+
+        // - Busca El Producto Por Su ID Y Actualiza Sus Campos -
         const product = await Product.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true, runValidators: true }
         ).populate("category");
 
-        if (!product) { // No Existe
+        // - Verificar Que Existe -
+        if (!product) { 
             return res.status(404).json({ error: "Producto no encontrado" });
         }
-
+        
+        // - Actualización Completada -
         res.status(200).json(product);
-    } catch (error) { // Datos O Formato De ID Invalidos
+
+    } catch (error) { 
+
+        // - Datos O Formato De ID Invalidos -
         if (error.name === "ValidationError" || error.name === "CastError") {
             return res.status(400).json({ error: error.message });
         }
 
-        // Manejar Error Desconocido
+        // - Manejar Error Desconocido -
         res.status(500).json({ error: "Error al actualizar producto" });
     }
 };
@@ -80,6 +119,7 @@ const updateProduct = async (req, res) => {
 
 // DELETE /products/:id — Eliminar producto
 const deleteProduct = async (req, res) => {
+
     try { // Eliminar Producto Por Su ID
         const product = await Product.findByIdAndDelete(req.params.id);
 
