@@ -1,5 +1,9 @@
-// --- Importar Mongoose ---
+// --- Importar Schema De Categorias ---
 const Category = require("../models/Category");
+
+// --- Importar Schema De Producto ---
+const Product = require("../models/Product");
+
 
 // ====================================
 // CONTROLADOR DE ACCIONES 
@@ -85,6 +89,15 @@ const updateCategory = async (req, res) => {
 
 // DELETE /categories/:id — Eliminar una categoría por su ID
 const deleteCategory = async (req, res) => {
+
+    const products = await Product.exists({ category: req.params.id });
+
+    if (products) {
+        return res.status(409).json({
+            error: "No se puede eliminar una categoría con productos asociados"
+        });
+    }
+
     try { // Busca La categoria en la BD Por Su ID Y La Elmina
         const category = await Category.findByIdAndDelete(req.params.id);
 
