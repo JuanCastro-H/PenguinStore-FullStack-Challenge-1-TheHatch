@@ -8,9 +8,10 @@ const request = require("supertest");
 // --- Importar Mongoose ---
 const mongoose = require("mongoose");
 
-// --- Configuracion De La Aplicacion Y Schema De Categorias ---
+// --- Configuracion De La Aplicacion Y Schema De Categorias Y Productos ---
 const app = require("../../src/app");
 const Category = require("../../src/models/Category");
+const Product = require("../../src/models/Product");
 
 
 // --- Preparacion Inicial Para Las Pruebas ---
@@ -173,4 +174,30 @@ test("DELETE /categories/:id — devuelve 404 si la categoría no existe", async
 
     // - Verificar Que Devuelve El Error Correcto -
     assert.equal(response.status, 404);
+});
+
+
+// --- PRUEBA 11: IMPEDIR QUE SE ELIMINE UNA CATEGORÍA CON PRODUCTOS ASOCIADOS ---
+test("DELETE /categories/:id — rechaza eliminar una categoría con productos asociados", async () => {
+    
+    // - Crear Categoria De Prueba -
+    const category = await Category.create({name: "Categoría protegida" });
+
+    // - Crear Producto Y Asociarlo Con La Categoría -
+    await Product.create({
+        name: "Producto asociado",
+        description: "Prueba de integridad",
+        price: 100,
+        stock: 5,
+        category: category._id
+    });
+
+    // - Intentar Eliminar Categoria -
+    const response = await request(app)
+        .delete(`/categories/${category._id}`);
+    
+    // - Verificaciones -
+    assert.equal(response.status, 409);                                // Error de conflicto con los datos actuales
+    const categoryStillExists = await Category.findById(category._id); // Obtener ID de la categoría 
+    assert.ok(categoryStillExists);                                    // Verificar que todavia existe
 });
