@@ -239,3 +239,22 @@ test("POST /products — rechaza una categoría inexistente", async () => {
     // - Verificar Error -
     assert.equal(response.status, 400);
 });
+
+
+// --- PRUEBA 12: INTENTAR OBTENER UN PRODUCTO POR SU ID Y DEVOLVER ERROR 404 ---
+test("PUT /products/:id — devuelve 404 si el producto no existe, aunque la categoría sea inválida", async () => {
+    // - Crear IDs Aleatorios -
+    const productId = new mongoose.Types.ObjectId();
+    const invalidCategoryId = new mongoose.Types.ObjectId();
+
+    // - Realizar Solicitud Para Crear Producto -
+    const response = await request(app)
+        .put(`/products/${productId}`)
+        .send({
+            name: "Producto inexistente",
+            category: invalidCategoryId
+        });
+    
+    // - Verificar Error Correspondiente -
+    assert.equal(response.status, 404);
+});
