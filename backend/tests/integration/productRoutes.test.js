@@ -279,3 +279,30 @@ test("POST /products — ignora los campos que no están permitidos", async () =
     assert.equal(response.status, 201);
     assert.equal(response.body.isAdmin, undefined);
 });
+
+
+// --- PRUEBA 14: ACTUALIZAR CAMPOS UNICOS
+test("PUT /products/:id — permite actualizar únicamente el nombre", async () => {
+    // - Crear Producto De Prueba -
+    const product = await Product.create({
+        name: "Nombre original",
+        description: "Descripción original",
+        price: 100,
+        stock: 5,
+        category: category._id
+    });
+
+    // - Realizar Peticion Para Actualizar El Nombre -
+    const response = await request(app)
+        .put(`/products/${product._id}`)
+        .send({
+            name: "Nombre actualizado"
+        });
+    
+    // - Verificaciones -
+    assert.equal(response.status, 200);                              // Respuesta positiva
+    assert.equal(response.body.name, "Nombre actualizado");          // Nombre nuevo
+    assert.equal(response.body.description, "Descripción original"); // Se mantiene la descripción
+    assert.equal(response.body.price, 100);                          // El precio
+    assert.equal(response.body.stock, 5);                            // La cantidad en stock
+});
