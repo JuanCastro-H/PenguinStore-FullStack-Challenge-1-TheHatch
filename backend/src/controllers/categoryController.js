@@ -100,40 +100,41 @@ const updateCategory = async (req, res) => {
     try {  
         
         // - Buscar Categoria Por ID -
-        const category = await Category.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        );
-
+        const category = await Category.findById(req.params.id);
+        
         // Verificar Si Existe
         if (!category) { 
             return res.status(404).json({ error: "Categoría no encontrada" });
         }
-
+        
         // - Obtener Y Guadar Datos -
         const { name, description, isActive } = req.body;
-
+        
         const allowedFields = {};
 
+        if (name !== undefined) {
+            allowedFields.name = name;
+        }
+        
         if (description !== undefined){
-            categoryData.description = description;
+            allowedFields.description = description;
         }
-
+        
         if (isActive !== undefined){
-            categoryData.isActive = isActive;
+            allowedFields.isActive = isActive;
         }
-
+        
+        // - Evitar Actualizaciones vacías -
         if (Object.keys(allowedFields).length === 0){
             return res.status(400).json({
                 error: "Debes proporcionar al menos un campo válido para actualizar"
             });
         }
-
+        
         // - Aplicar Y Guardar Cambios -
         Object.assign(category, allowedFields);
         const updatedCategory = await category.save();
-
+        
         // - Operación Realizada Con Exito
         res.status(200).json(updatedCategory);
 
@@ -173,7 +174,7 @@ const deleteCategory = async (req, res) => {
         }
         
         // - Verificar Que No Tenga Productos Asociados -
-        const products = await Product.exists({ category: req.params.id });
+        const products = await Product.exists({ category: category._id});
         
         if (products) {
             return res.status(409).json({
@@ -182,7 +183,7 @@ const deleteCategory = async (req, res) => {
         }
         
         // - Eliminar Categoria Y Retornar Proceso Exitoso -
-        await Category.findByIdAndDelete(category.id);
+        await Category.findByIdAndDelete(category._id);
         res.status(200).json({ message: "Categoría eliminada correctamente" });
 
     } catch (error) { 
