@@ -43,23 +43,39 @@ const getProductById = async (req, res) => {
 // POST /products — Crear producto
 const createProduct = async (req, res) => {
 
-    // - Obtener Categoria -
-    const category = await Category.findById(req.body.category);
+    
+    try {
+        
+        // - Obtener Datos Del Producto -
+        const { name, description, price, stock } = req.body
+        const category = await Category.findById(req.body.category);
+    
+        // - Verificar Que Existe La Categoria -
+        if (!category) {
+            return res.status(400).json({
+                error: "La categoría indicada no existe"
+            });
+        }
 
-    // - Verificar Que Existe -
-    if (!category) {
-        return res.status(400).json({
-            error: "La categoría indicada no existe"
-        });
-    }
+        // - Campos Del Producto Permitidos -
+        const productData = {
+            name,
+            description,
+            price,
+            stock,
+            category
+        }
 
-    try { // Obtener Datos Del Producto Y Crearlo
-        const product = await Product.create(req.body);
-          // Agregarle Su Categoria
+        // - Crear Producto Y Agregarle su categoria -
+        const product = await Product.create(productData);
         const populatedProduct = await product.populate("category");
 
+        // - Todo Salio Bien -
         res.status(201).json(populatedProduct);
+
+        
     } catch (error) { // Datos O Formato De ID Invalidos
+
         if (error.name === "ValidationError" || error.name === "CastError") {
             return res.status(400).json({ error: error.message });
         }
@@ -84,34 +100,41 @@ const updateProduct = async (req, res) => {
         }
 
 
+        // - Obtener Campos Permitidos -
+        const { name, description, price, stock, category } = req.body;
+
+        const productData = {};
+
+        // - Agregar Campos Presentes En La Petición -
+        if (name !== undefined) productData.name = name;
+        if (description !== undefined) productData.description = description;
+        if (price !== undefined) productData.price = price;
+        if (stock !== undefined) productData.stock = stock;
+
         // - Verificar SI Se Proporciona Una Categoria
-        if (req.body.category !== undefined ) {
+        if (category !== undefined ) {
 
             // - Obtener Categoria -
-            const category = await Category.findById(req.body.category);
+            const existingCategory = await Category.findById(category);
             
             // - Verificar Que Existe -
-            if (!category) {
+            if (!existingCategory) {
                 return res.status(400).json({
                     error: "La categoría indicada no existe"
                 });
             }
+            // - Agregar El ID De Categoria A Los Datos -
+            productData.category = existingCategory._id;
         }
 
 
         // - Busca El Producto Por Su ID Y Actualiza Sus Campos -
         const product = await Product.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            productData,
             { new: true, runValidators: true }
         ).populate("category");
 
-
-        // - Verificar Que Existe -
-        if (!product) { 
-            return res.status(404).json({ error: "Producto no encontrado" });
-        }
-        
         // - Actualización Completada -
         res.status(200).json(product);
 
