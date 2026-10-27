@@ -26,16 +26,28 @@ const getCategories = async (req, res) => {
 // GET /categories/:id — Obtener una categoría por su ID
 const getCategoryById = async (req, res) => {
 
-    try { // Obtener Id y Buscar La Categoria Expesifica
+    try { // - Obtener Id y Buscar La Categoria Expesifica -
         const category = await Category.findById(req.params.id);
 
         if (!category) { // No Se Encuentra 
             return res.status(404).json({ error: "Categoría no encontrada" });
         }
 
+        // - Operación completada -
         res.status(200).json(category); 
-    } catch (error) { // ID Invalido
-        res.status(400).json({ error: "ID de categoría inválido" });
+
+
+    } catch (error) { 
+
+        if (error.name === "CastError") {
+            return res.status(400).json({
+                error: "ID de categoría inválido"
+            });
+        }
+
+        return res.status(500).json({
+            error: "Error al obtener categoría"
+        });
     }
 };
 
@@ -43,20 +55,40 @@ const getCategoryById = async (req, res) => {
 // POST /categories — Crear una nueva categoría 
 const createCategory = async (req, res) => {
 
-    try { // Obtener Datos Y Crear Categoria Nueva
-        const category = await Category.create(req.body);
+    try { 
+
+        // - Obtener Datos Y Guardalos  -
+        const { name, description, isActive } = req.body;
+
+
+        const categoryData = { name };
+
+        if (description !== undefined){
+            categoryData.description = description;
+        }
+
+        if (isActive !== undefined){
+            categoryData.isActive = isActive;
+        }
+
+        // Crear Categoria Nueva
+        const category = await Category.create(categoryData);
         res.status(201).json(category);
-    } catch (error) { // Ya existe
+
+
+    } catch (error) { 
+
+        // - Ya existe La Categoria
         if (error.code === 11000) {
             return res.status(409).json({ error: "La categoría ya existe" });
         }
 
-        // Datos Invalidos
+        // - Datos Invalidos -
         if (error.name === "ValidationError") { 
             return res.status(400).json({ error: error.message });
         }
 
-        // Manejar Errores extras
+        // - Manejar Errores extras -
         res.status(500).json({ error: "Error al crear categoría" });
     }
 };
@@ -64,25 +96,66 @@ const createCategory = async (req, res) => {
 
 // PUT /categories/:id — Actualizar una categoría por su ID
 const updateCategory = async (req, res) => {
-    try {  // Buscar Categoria Por ID Y Actualizar Campos 
+
+    try {  
+        
+        // - Buscar Categoria Por ID -
         const category = await Category.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true, runValidators: true }
         );
 
-        if (!category) { // ID Incorrecto
+        // Verificar Si Existe
+        if (!category) { 
             return res.status(404).json({ error: "Categoría no encontrada" });
         }
 
-        res.status(200).json(category);
-    } catch (error) { // Datos Invalidos
+        // - Obtener Y Guadar Datos -
+        const { name, description, isActive } = req.body;
+
+        const allowedFields = {};
+
+        if (description !== undefined){
+            categoryData.description = description;
+        }
+
+        if (isActive !== undefined){
+            categoryData.isActive = isActive;
+        }
+
+        if (Object.keys(allowedFields).length === 0){
+            return res.status(400).json({
+                error: "Debes proporcionar al menos un campo válido para actualizar"
+            });
+        }
+
+        // - Aplicar Y Guardar Cambios -
+        Object.assign(category, allowedFields);
+        const updatedCategory = await category.save();
+
+        // - Operación Realizada Con Exito
+        res.status(200).json(updatedCategory);
+
+
+    } catch (error) { 
+
+        // - Ya existe La Categoria
+        if (error.code === 11000) {
+            return res.status(409).json({
+                error: "Ya existe una categoría con esos datos"
+            });
+        }
+
+        // - Datos Invalidos -
         if (error.name === "ValidationError") {
             return res.status(400).json({ error: error.message });
         }
         
-        // Capturar Errores de ID o formato
-        res.status(400).json({ error: "No se pudo actualizar la categoría" });
+        // - Errores No
+        return res.status(500).json({
+            error: "Error al actualizar categoría"
+        });
     }
 };
 
@@ -90,24 +163,40 @@ const updateCategory = async (req, res) => {
 // DELETE /categories/:id — Eliminar una categoría por su ID
 const deleteCategory = async (req, res) => {
 
-    const products = await Product.exists({ category: req.params.id });
+    try { 
 
-    if (products) {
-        return res.status(409).json({
-            error: "No se puede eliminar una categoría con productos asociados"
-        });
-    }
-
-    try { // Busca La categoria en la BD Por Su ID Y La Elmina
-        const category = await Category.findByIdAndDelete(req.params.id);
+        // - Verificar Que La Categoria Exista -
+        const category = await Category.findById(req.params.id);
 
         if (!category) { // ID no existe
             return res.status(404).json({ error: "Categoría no encontrada" });
         }
-
+        
+        // - Verificar Que No Tenga Productos Asociados -
+        const products = await Product.exists({ category: req.params.id });
+        
+        if (products) {
+            return res.status(409).json({
+                error: "No se puede eliminar una categoría con productos asociados"
+            });
+        }
+        
+        // - Eliminar Categoria Y Retornar Proceso Exitoso -
+        await Category.findByIdAndDelete(category.id);
         res.status(200).json({ message: "Categoría eliminada correctamente" });
-    } catch (error) { // Formato De ID No Procesable
-        res.status(400).json({ error: "ID de categoría inválido" });
+
+    } catch (error) { 
+
+        // - Formato De ID No Valido -
+        if (error.name === "CastError") {
+            return res.status(400).json({
+                error: "ID de categoría inválido"
+            });
+        }
+
+        return res.status(500).json({
+            error: "Error al eliminar categoría"
+        });
     }
 };
 
