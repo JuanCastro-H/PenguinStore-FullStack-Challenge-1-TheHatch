@@ -241,7 +241,7 @@ test("POST /products — rechaza una categoría inexistente", async () => {
 });
 
 
-// --- PRUEBA 12: INTENTAR OBTENER UN PRODUCTO POR SU ID Y DEVOLVER ERROR 404 ---
+// --- PRUEBA 12: INTENTAR ACTUALIZAR UN PRODUCTO POR SU ID Y DEVOLVER ERROR 404 ---
 test("PUT /products/:id — devuelve 404 si el producto no existe, aunque la categoría sea inválida", async () => {
     // - Crear IDs Aleatorios -
     const productId = new mongoose.Types.ObjectId();
@@ -257,4 +257,25 @@ test("PUT /products/:id — devuelve 404 si el producto no existe, aunque la cat
     
     // - Verificar Error Correspondiente -
     assert.equal(response.status, 404);
+});
+
+
+// --- PRUEBA 13: ENVIAR CAMPOS EXTRAS A LA PETICIÓN Y IGNORARLOS ---
+test("POST /products — ignora los campos que no están permitidos", async () => {
+
+    // - Hacer Peticion Con Campos Extras -
+    const response = await request(app)
+        .post("/products")
+        .send({
+            name: "Producto seguro",
+            description: "Prueba de campos permitidos",
+            price: 100,
+            stock: 5,
+            category: category._id,
+            isAdmin: true // Campo Extra
+        });
+
+    // - Validar Respuesta Correcta Y Campo Extra Ignorado -
+    assert.equal(response.status, 201);
+    assert.equal(response.body.isAdmin, undefined);
 });
