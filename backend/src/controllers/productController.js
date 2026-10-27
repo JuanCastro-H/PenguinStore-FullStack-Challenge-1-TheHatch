@@ -32,10 +32,18 @@ const getProductById = async (req, res) => {
         if (!product) { // No Existe 
             return res.status(404).json({ error: "Producto no encontrado" });
         }
-
+        // - Operacion realizada Con exito -
         res.status(200).json(product);
+
     } catch (error) { // ID Tiene Formato Incombatible
-        res.status(400).json({ error: "ID de producto inválido" });
+
+        if (error.name === "CastError"){
+            return res.status(400).json({
+                error: "ID de producto inválido"
+            });
+        }
+        
+        res.status(500).json({ error: "Error interno del servidor" });
     }
 };
 
@@ -63,8 +71,8 @@ const createProduct = async (req, res) => {
             description,
             price,
             stock,
-            category
-        }
+            category: category._id
+        };
 
         // - Crear Producto Y Agregarle su categoria -
         const product = await Product.create(productData);
@@ -127,6 +135,13 @@ const updateProduct = async (req, res) => {
             productData.category = existingCategory._id;
         }
 
+        // - Rechazar Peticion Si No Hay Campos A Actualizar
+        if (Object.keys(productData).length === 0) {
+            return res.status(400).json({
+                error: "Debes proporcionar al menos un campo para actualizar"
+            });
+        }
+
 
         // - Busca El Producto Por Su ID Y Actualiza Sus Campos -
         const product = await Product.findByIdAndUpdate(
@@ -165,8 +180,17 @@ const deleteProduct = async (req, res) => {
         res.status(200).json({
             message: "Producto eliminado correctamente"
         });
+
     } catch (error) { // Formato De ID Invalido
-        res.status(400).json({ error: "ID de producto inválido" });
+
+        if (error.name === "CastError"){
+            return res.status(400).json({
+                error: "ID de producto inválido"
+            });
+        }
+        
+        res.status(500).json({ error: "Error interno del servidor" });
+
     }
 };
 
