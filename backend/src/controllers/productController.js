@@ -74,6 +74,16 @@ const updateProduct = async (req, res) => {
 
     try { 
 
+        // - Verificar Si Existe El Producto -
+        const existingProduct = await Product.findById(req.params.id);
+
+        if (!existingProduct) {
+            return res.status(404).json({
+                error: "Producto no encontrado"
+            });
+        }
+
+
         // - Verificar SI Se Proporciona Una Categoria
         if (req.body.category !== undefined ) {
 
@@ -86,8 +96,8 @@ const updateProduct = async (req, res) => {
                     error: "La categoría indicada no existe"
                 });
             }
-
         }
+
 
         // - Busca El Producto Por Su ID Y Actualiza Sus Campos -
         const product = await Product.findByIdAndUpdate(
@@ -95,6 +105,7 @@ const updateProduct = async (req, res) => {
             req.body,
             { new: true, runValidators: true }
         ).populate("category");
+
 
         // - Verificar Que Existe -
         if (!product) { 
@@ -114,6 +125,7 @@ const updateProduct = async (req, res) => {
         // - Manejar Error Desconocido -
         res.status(500).json({ error: "Error al actualizar producto" });
     }
+
 };
 
 
