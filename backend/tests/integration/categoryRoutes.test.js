@@ -244,3 +244,20 @@ test("PUT /categories/:id — devuelve 400 si el cuerpo está vacío", async () 
 
     assert.equal(unchangedCategory.name,"Categoría actualización vacía"); // Verificar que no fue modificada
 }); 
+
+
+// --- PRUEBA 14: RECHAZAR CATEGORÍAS DUPLICADAS ---
+test("POST /categories — devuelve 409 si la categoría ya existe", async () => {
+    // - Crear Categoria De Prueba -
+    await Category.create({
+        name: "Categoría duplicada"
+    });
+
+    // - Intentara Crear La Misma Categoria -
+    const response = await request(app)
+        .post("/categories")
+        .send({ name: "Categoría duplicada" });
+
+    // - Verificar Rechazo -
+    assert.equal(response.status, 409);
+});
