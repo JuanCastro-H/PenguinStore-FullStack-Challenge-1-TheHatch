@@ -201,3 +201,25 @@ test("DELETE /categories/:id — rechaza eliminar una categoría con productos a
     const categoryStillExists = await Category.findById(category._id); // Obtener ID de la categoría 
     assert.ok(categoryStillExists);                                    // Verificar que todavia existe
 });
+
+
+// --- PRUEBA 12: RECHAZAR ACTUALIZACIONES SIN CAMPOS PERMITIDOS ---
+test("PUT /categories/:id — devuelve 400 si no hay campos permitidos", async () => {
+    // - Crear Categoria -
+    const category = await Category.create({
+        name: "Categoría sin cambios"
+    });
+
+    // - Realizar Petición Con Un Campo Invalido
+    const response = await request(app)
+        .put(`/categories/${category._id}`)
+        .send({ isAdmin: true });
+
+    // - Verificaciones -
+    assert.equal(response.status, 400);                              // Que se rechace la actualizción
+
+    const unchangedCategory = await Category.findById(category._id); // Obtener Categoria
+
+    assert.equal(unchangedCategory.name, "Categoría sin cambios");   // Verificar que no hubo cambios
+    assert.equal(unchangedCategory.isAdmin, undefined);              // Que no se agrege el campo invalido
+}); 
