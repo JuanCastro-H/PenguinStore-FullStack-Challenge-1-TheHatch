@@ -223,3 +223,24 @@ test("PUT /categories/:id — devuelve 400 si no hay campos permitidos", async (
     assert.equal(unchangedCategory.name, "Categoría sin cambios");   // Verificar que no hubo cambios
     assert.equal(unchangedCategory.isAdmin, undefined);              // Que no se agrege el campo invalido
 }); 
+
+
+// --- PRUEBA 13: RECHAZAR ACTUALIZACIONES VACÍAS ---
+test("PUT /categories/:id — devuelve 400 si el cuerpo está vacío", async () => {
+     // - Crear Categoria -
+    const category = await Category.create({
+        name: "Categoría actualización vacía"
+    });
+
+    // - Realizar Peticion Vacia
+    const response = await request(app)
+        .put(`/categories/${category._id}`)
+        .send({});
+
+    // - Verifiaciones 
+    assert.equal(response.status, 400);                                   // Rechazo de la actualización
+
+    const unchangedCategory = await Category.findById(category._id);      // Obtener la categoria
+
+    assert.equal(unchangedCategory.name,"Categoría actualización vacía"); // Verificar que no fue modificada
+}); 
