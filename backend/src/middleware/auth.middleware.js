@@ -245,6 +245,89 @@ const authenticateToken = async (req, res, next) => {
     }
 
 
+    // -----------------------------
+    // OPCION 2 - COOKIE
+    // -----------------------------
+
+    // --- Obtener JWT De La Cookie ---
+
+    const token = req.cookies?.accessToken;
+
+
+    // --- Manejar Error Si No Se Obtiene ---
+
+    if (!token) {
+        return res.status(401).json({
+            message: "Authentication required"
+        });
+    }
+
+
+    try {
+
+        // --- Verificar JWT + Session ---
+
+        await verifySession(token, req, "cookie");
+
+
+        // --- Continuar Con El Flujo ---
+
+        return next();
+
+    } catch (error) {
+
+        // --- Manejar Errores Del JWT ---
+
+        if (
+            error.name === "TokenExpiredError" ||
+            error.name === "JsonWebTokenError" ||
+            error.name === "NotBeforeError"
+        ) {
+            return res.status(401).json({
+                message: "Invalid or expired token"
+            });
+        }
+
+
+        // --- Comprobar Estado De La Cuenta ---
+
+        if (error.message === "ACCOUNT_INACTIVE") {
+            return res.status(403).json({
+                message: "Account inactive"
+            });
+        }
+
+
+        // --- Comprobar Rol Del Usuario ---
+
+        if (error.message === "USER_ROLE_NOT_FOUND") {
+            return res.status(403).json({
+                message: "User role not found"
+            });
+        }
+
+
+        // --- Manejar Errores De Session ---
+
+        if (
+            error.message === "SESSION_NOT_FOUND" ||
+            error.message === "SESSION_REVOKED" ||
+            error.message === "SESSION_EXPIRED" ||
+            error.message === "INVALID_TOKEN" ||
+            error.message === "INVALID_SESSION_TOKEN" ||
+            error.message === "USER_NOT_FOUND"
+        ) {
+            return res.status(401).json({
+                message: "Invalid or inactive session"
+            });
+        }
+
+
+        // --- Manejar Errores Desconocidos ---
+
+        return next(error);
+    }
+
 };
 
 
