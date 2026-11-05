@@ -30,19 +30,19 @@ const SESSION_DURATION_MINUTES = 15; // Tiempo de la sessión
 // ------------------------------
 
 const createLoginAttempt = async ({
-    userId,
+    userId = null,
     email,
     ipAddress,
     success
 }) => {
 
     await LoginAttempt.create({
-        data: {
+
             user: userId,
             email,
             ipAddress,
             success
-        }
+
     });
 };
 
@@ -88,14 +88,14 @@ const registerUser = async ({email, password}) => {
         const user = await User.create({
                 email: normalizedEmail,  // Correo.
                 passwordHash,            // Clave hasheada.
-                roleId: userRole._id      // Id del nuevo usuario.
+                role: userRole._id      // Id del nuevo usuario.
         });
     
         // --- Retornar Datos Publicos Del Usuario ---
         return {
             id: user._id,
             email: user.email,
-            role: userRole,
+            role: userRole.name,
             createdAt: user.createdAt
         };
 
@@ -131,24 +131,30 @@ const loginUser = async ({email, password, ipAddress}) => {
         email: normalizedEmail
     }).populate("role");
 
-
+    
     // --- Si El Usuario No Existe ---
     if (!user) {
-
+        
         //  Registrar intento de registro fallido.
         await createLoginAttempt({
-
+            
             userId: null,
             email: normalizedEmail,
             ipAddress,
             success: false
-
+            
         });
-
+        
         throw new Error("INVALID_CREDENTIALS");
-
+        
     }
+    
 
+    // --- Verificar Que El Usuario tenga Rol ---
+    if (!user.role) {
+        throw new Error("USER_ROLE_NOT_FOUND");
+    }
+    
 
     // --- Comprobar Si La Cuenta Esta Activa ---
     if (!user.isActive) {
@@ -165,11 +171,32 @@ const loginUser = async ({email, password, ipAddress}) => {
     }
 
 
-    // --- Comprobar Si La Cuenta Esta Bloqueada ---
-    if (user.lockedUntil && user.lockedUntil > new Date()){
+    // --- Comprobar Si El Bloque ya expiró Esta ---
+
+    if (user.lockedUntil && user.lockedUntil <= new Date()) {
+
+        await User.findByIdAndUpdate(user._id, {
+            failedLoginAttempts: 0,
+            lockedUntil: null
+        });
+
+        // Actualizar también el documento en memoria
+        user.failedLoginAttempts = 0;
+        user.lockedUntil = null;
+    }
+
+
+    // --- Comprobar si la cuenta sigue bloqueada ---
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+
+        await createLoginAttempt({
+            userId: user._id,
+            email: user.email,
+            ipAddress,
+            success: false
+        });
 
         throw new Error("ACCOUNT_LOCKED");
-
     }
 
 
@@ -225,15 +252,6 @@ const loginUser = async ({email, password, ipAddress}) => {
     // LOGIN EXITOSO
     // -----------------------------
 
-    await createLoginAttempt({
-
-        userId: user._id,
-        email: user.email,
-        ipAddress,
-        success: true
-
-    });
-
 
     // --- Reiniciar Contador ---
 
@@ -263,7 +281,7 @@ const loginUser = async ({email, password, ipAddress}) => {
     const session = await Session.create({
 
             sessionTokenHash: generateSessionPlaceholder(),
-            userId: user._id,
+            user: user._id,
             expiresAt
 
     });
@@ -283,8 +301,19 @@ const loginUser = async ({email, password, ipAddress}) => {
     
     
         // --- Encriptar Token De Session Y Guardarlo ---
-        const sessionTokenHash = hashToken(token);
+        session.sessionTokenHash = hashToken(token);
         await session.save();
+
+
+        // --- Registrar Login Exitoso ---
+        await createLoginAttempt({
+
+        userId: user._id,
+        email: user.email,
+        ipAddress,
+        success: true
+
+        });
     
 
         // --- Devolver Resultado ---
@@ -332,7 +361,7 @@ const logoutUser = async (sessionId) => {
         throw new Error("SESSION_ALREADY_REVOKED");
     }
 
-    session.revokedAt = new Daate();
+    session.revokedAt = new Date();
 
     // --- Revocar Sesion ---
 
