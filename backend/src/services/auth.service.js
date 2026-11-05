@@ -111,3 +111,199 @@ const registerUser = async ({email, password}) => {
     }
 };
 
+
+
+
+// ------------------------------
+// INICIAR SESION
+// ------------------------------
+
+const loginUser = async ({email, password, ipAddress}) => {
+
+    // --- Normalizar Email ---
+    const normalizedEmail = email
+        .trim()
+        .toLowerCase();
+    
+
+    // --- Buscar Usuario ---
+    const user = await User.findOne({
+        email: normalizedEmail
+    }).populate("role");
+
+
+    // --- Si El Usuario No Existe ---
+    if (!user) {
+
+        //  Registrar intento de registro fallido.
+        await createLoginAttempt({
+
+            userId: null,
+            email: normalizedEmail,
+            ipAddress,
+            success: false
+
+        });
+
+        throw new Error("INVALID_CREDENTIALS");
+
+    }
+
+
+    // --- Comprobar Si La Cuenta Esta Activa ---
+    if (!user.isActive) {
+
+        await createLoginAttempt({
+            userId: user._id,
+            email: user.email,
+            ipAddress,
+            success: false
+        });
+
+        throw new Error("ACCOUNT_INACTIVE");
+
+    }
+
+
+    // --- Comprobar Si La Cuenta Esta Bloqueada ---
+    if (user.lockedUntil && user.lockedUntil > new Date()){
+
+        throw new Error("ACCOUNT_LOCKED");
+
+    }
+
+
+    // --- Verificar Contrasenia ---
+    const passwordIsValid = await verifyPassword(
+        user.passwordHash,
+        password
+    );
+
+
+    // --- Contrasenia Incorrecta ---
+    if (!passwordIsValid){
+
+        // Registrar intentos
+        await createLoginAttempt({
+
+            userId: user._id,
+            email: user.email,
+            ipAddress,
+            success: false
+
+        });
+
+        // Aumentar El Numero De Intentos Fallidos
+        const updatedUser = await User.findByIdAndUpdate( 
+            user._id,                             // Indentificar de usuario
+            { $inc: { failedLoginAttempts: 1 } }, // Incrementar valor
+            {                                     
+                returnDocument: "after",          // Obtener documento actualizado
+                runValidators: true               // Asegurarse que el cambio cumpla con el schema
+            }
+        );
+
+
+        // --- Comprobar Si Se Alcanzo EL Numero De Intentos ---
+        if (updatedUser.failedLoginAttempts >= MAX_FAILED_ATTEMPTS){
+
+            // Calcular Tiempo Del Bloqueo.
+            const lockedUntil = new Date(Date.now() + LOCK_TIME_MINUTES * 60 * 1000);
+
+            await User.findByIdAndUpdate(
+                user._id,
+                { lockedUntil },
+                { runValidators: true}
+            );
+        } 
+
+        throw new Error("INVALID_CREDENTIALS");
+
+    }
+
+    // -----------------------------
+    // LOGIN EXITOSO
+    // -----------------------------
+
+    await createLoginAttempt({
+
+        userId: user._id,
+        email: user.email,
+        ipAddress,
+        success: true
+
+    });
+
+
+    // --- Reiniciar Contador ---
+
+    await User.findByIdAndUpdate(
+
+        user._id,                    // Identificador del usuario
+        {
+            failedLoginAttempts: 0,  // Reinicar intentos
+            lockedUntil: null        // Quitar fecha de bloqueo
+        },
+        { runValidators: true }      // Asegurarse que se cumple el schema
+
+    );
+
+
+    // -----------------------------
+    //  CREAR SESSION 
+    // -----------------------------
+
+
+    // ---  Calcular Fecha De Expiracion De La Session ---
+    const expiresAt = new Date(
+        Date.now() + SESSION_DURATION_MINUTES * 60 * 1000
+    );
+
+    // --- Registrar Session En La Base De Datos ---
+    const session = await Session.create({
+
+            sessionTokenHash: generateSessionPlaceholder(),
+            userId: user._id,
+            expiresAt
+
+    });
+
+
+    try {
+
+        // --- Generar JWT ---
+        const token = generateToken({
+    
+            sub: user._id.toString(),
+            email: user.email,
+            role: user.role.name,
+            sessionId: session._id.toString()
+    
+        });
+    
+    
+        // --- Encriptar Token De Session Y Guardarlo ---
+        const sessionTokenHash = hashToken(token);
+        await session.save();
+    
+
+        // --- Devolver Resultado ---
+        return {
+            token,                              // Devolver JWT.
+            sessionId: session._id.toString(),  // Devolver session.
+            // - Datos De Usuario -
+            user: {
+                id: user.id,
+                email: user.email,
+                role: user.role.name
+            }
+        };
+
+
+    } catch (error) {
+
+        await Session.findByIdAndDelete(session._id);
+        throw error;
+
+    }
+};
