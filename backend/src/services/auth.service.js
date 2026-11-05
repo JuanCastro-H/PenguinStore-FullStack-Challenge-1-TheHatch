@@ -307,3 +307,45 @@ const loginUser = async ({email, password, ipAddress}) => {
 
     }
 };
+
+
+
+// --------------------------------
+//  CERRAR SESIÓN
+// --------------------------------
+
+const logoutUser = async (sessionId) => {
+
+    // --- Buscar La Sesion Unica En La BD ---
+
+    const session = await Session.findById(sessionId);
+
+
+    // --- Comprobar Que Existe ---
+
+    if (!session) { // Se detiene la ejecucion y lanza un error.
+        throw new Error("SESSION_NOT_FOUND");
+    }
+
+
+    if (session.revokedAt) {
+        throw new Error("SESSION_ALREADY_REVOKED");
+    }
+
+    session.revokedAt = new Daate();
+
+    // --- Revocar Sesion ---
+
+    await session.save();
+
+};
+
+
+
+
+// --- Exportar Funciones Del Modulo ---
+module.exports = {
+    registerUser,
+    loginUser,
+    logoutUser
+};
