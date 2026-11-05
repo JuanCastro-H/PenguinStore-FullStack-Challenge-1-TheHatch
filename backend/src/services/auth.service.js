@@ -12,6 +12,7 @@ const LoginAttempt = require("../models/LoginAttempt");
 const { hashPassword, verifyPassword } = require("./password.service");
 const { generateToken } = require("./jwt.service");
 const { hashToken, generateSessionPlaceholder } = require("./session.service");
+const { generateCsrfToken, hashCsrfToken, } = require("./csrf.service");
 
 
 // ----------------------------------------
@@ -277,10 +278,16 @@ const loginUser = async ({email, password, ipAddress}) => {
         Date.now() + SESSION_DURATION_MINUTES * 60 * 1000
     );
 
+
+    // --- Generar Token CSRF ---
+    const csrfToken = generateCsrfToken();
+
+
     // --- Registrar Session En La Base De Datos ---
     const session = await Session.create({
 
             sessionTokenHash: generateSessionPlaceholder(),
+            csrfTokenHash: hashCsrfToken(csrfToken),
             user: user._id,
             expiresAt
 
@@ -319,6 +326,7 @@ const loginUser = async ({email, password, ipAddress}) => {
         // --- Devolver Resultado ---
         return {
             token,                              // Devolver JWT.
+            csrfToken,                          // Devolver Token csrf
             sessionId: session._id.toString(),  // Devolver session.
             // - Datos De Usuario -
             user: {
