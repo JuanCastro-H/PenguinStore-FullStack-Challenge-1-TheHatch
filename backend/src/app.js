@@ -3,8 +3,19 @@ const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const path = require("path");
 
 const app = express();
+
+
+// =============================================
+// CONFIGURACIÓN DE VISTAS
+// =============================================
+
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+
+
 
 // =============================================
 // CONFIGURACIÓN DE SEGURIDAD
@@ -14,7 +25,6 @@ const app = express();
 // --- Helmet ---
 
 app.use(helmet());
-
 
 // --- CORS ---
 
@@ -44,6 +54,14 @@ app.use(express.urlencoded({
 // --- Procesar Cookies ---
 
 app.use(cookieParser());
+
+
+
+// =============================================
+// ARCHIVOS ESTÁTICOS
+// =============================================
+
+app.use(express.static(path.join(__dirname, "public")));
 
 
 
