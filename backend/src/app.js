@@ -99,6 +99,11 @@ app.use("/categories", require("./routes/categoryRoutes"));
 app.use("/products", require("./routes/productRoutes"));
 
 
+// --- Panel Administrativo ---
+
+app.use("/admin", require("./routes/adminView.routes"));
+
+
 
 // =============================================
 // RUTA NO ENCONTRADA
