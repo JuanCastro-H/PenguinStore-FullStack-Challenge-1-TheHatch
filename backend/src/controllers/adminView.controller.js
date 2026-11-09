@@ -33,16 +33,21 @@ const showLogin = (req, res) => {
 
     });
 
+    // --- Mensajes De Errores ---
+    const errors = {
 
+    csrf: "La sesión del formulario expiró. Intenta nuevamente.",
+    credentials: "Correo o contraseña incorrectos.",
+    unauthorized: "No tienes permisos para acceder al panel."
+
+    };
 
     // --- Renderizar Plantilla De Login ---
 
     res.render("auth/login", {
         title: "Iniciar Sesión | Penguin Store",
         csrfToken,
-        error: req.query.error === "csrf"
-            ? "La sesión del formulario expiró. Intenta nuevamente"
-            : null
+        error: errors[req.query.error] || null
     });
 
 };
@@ -83,9 +88,9 @@ const showDashboard = async (req, res, next) => {
 
 
 
-// ------------------------------------
-// PROCESAR LOGIN DE ADMINISTRADOR
-// ------------------------------------
+// -----------------------------------------
+// INICIAR SESSION AL PANEL ADMINISTRATIVO
+// -----------------------------------------
 
 const login = async (req, res, next) => {
 
