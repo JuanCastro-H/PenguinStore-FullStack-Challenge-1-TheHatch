@@ -31,6 +31,13 @@ app.use(express.urlencoded({
 }));
 
 
+
+// --- Vista De Prueba ---
+
+app.get("/test-view", (req, res) => {
+    res.render("test");
+});
+
 // =============================================
 // RUTA PARA COMPROBAR EL SERVIDOR
 // =============================================

@@ -6,6 +6,7 @@ const Category = require("../../src/models/Category");
 
 describe("Modelo Category", () => {
 
+    // --- Crear Slug (PASA) ---
     it("debe generar automáticamente el slug a partir del nombre", async () => {
         const category = new Category({
             name: "Ropa para Pingüinos"
@@ -16,6 +17,7 @@ describe("Modelo Category", () => {
         assert.equal(category.slug, "ropa-para-pinguinos");
     });
 
+    // --- Verificar Limpieza Del Slug (PASA) ---
     it("debe convertir el nombre en un slug en minúsculas y sin símbolos", async () => {
         const category = new Category({
             name: "¡Ofertas Especiales!"
@@ -26,6 +28,7 @@ describe("Modelo Category", () => {
         assert.equal(category.slug, "ofertas-especiales");
     });
 
+    // --- Categoria Activa Por Defecto (PASA) ---
     it("debe establecer isActive en true por defecto", () => {
         const category = new Category({
             name: "Peluches"
@@ -34,6 +37,7 @@ describe("Modelo Category", () => {
         assert.equal(category.isActive, true);
     });
 
+    // --- Intentar Crear Categoria Sin Nombre (FALLA) ---
     it("debe rechazar una categoría sin nombre", async () => {
         const category = new Category({});
 
@@ -47,6 +51,7 @@ describe("Modelo Category", () => {
         );
     });
 
+    // --- Usar Mas Caracteres De Lo Permitidos ---
     it("debe rechazar un nombre que supere los 50 caracteres", async () => {
         const category = new Category({
             name: "A".repeat(51)

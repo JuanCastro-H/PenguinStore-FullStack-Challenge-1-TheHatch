@@ -147,7 +147,7 @@ const updateProduct = async (req, res) => {
         const product = await Product.findByIdAndUpdate(
             req.params.id,
             productData,
-            { new: true, runValidators: true }
+            { returnDocument: "after", runValidators: true }
         ).populate("category");
 
         // - Actualización Completada -

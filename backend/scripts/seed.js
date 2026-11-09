@@ -31,7 +31,7 @@ const initializeRoles = async () => {
 
 
 // ========================================
-// INICIALIZAR ROLES
+// INICIALIZAR ROL DE ADMIN
 // ========================================
 
 const initializeAdmin = async () => {

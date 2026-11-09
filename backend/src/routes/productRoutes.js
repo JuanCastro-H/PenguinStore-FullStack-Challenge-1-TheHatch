@@ -13,18 +13,58 @@ const {
 } = require("../controllers/productController");
 
 
+// --- Importar Middlewares De Seguridad ---
+
+const { authenticateToken } = require("../middleware/auth.middleware");
+const { authorizeRoles }    = require("../middleware/role.middleware");
+const { verifyCsrfToken }   = require("../middleware/csrf.middleware");
+
+
 // ===== RUTAS =====
 
-// --- Obtener Lista De Productos 
+// ---------------------------------------------
+// CONSULTAR PRODUCTOS (PUBLICO)
+// ---------------------------------------------
+
+// --- Obtener Lista De Productos ---
 router.get("/", getProducts);
-// --- Obtener Producto Por Su ID
+// --- Obtener Producto Por Su ID ---
 router.get("/:id", getProductById);
-// --- Crear Nuevo Producto
-router.post("/", createProduct);
-// --- Actualizar Producto Por Su ID
-router.put("/:id", updateProduct);
-// --- Eliminar Producto Por Su ID
-router.delete("/:id", deleteProduct);
+
+
+// ---------------------------------------------
+// ADMINISTRAR PRODUCTOS (SOLO ADMIN)
+// ---------------------------------------------
+
+
+// --- Crear Nuevo Producto ---
+router.post(
+    "/",
+    authenticateToken,
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    createProduct
+);
+
+
+// --- Actualizar Producto Por Su ID ---
+router.put(
+    "/:id",
+    authenticateToken,
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    updateProduct
+);
+
+
+// --- Eliminar Producto Por Su ID ---
+router.delete(
+    "/:id",
+    authenticateToken,
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    deleteProduct
+);
 
 
 // --- Exportar Rutas ---

@@ -78,6 +78,12 @@ app.get("/health", (req, res) => {
     });
 });
 
+// --- Vista De Prueba ---
+
+app.get("/test-view", (req, res) => {
+    res.render("test");
+});
+
 // --- Autenticación ---
 
 app.use("/auth", require("./routes/auth.routes"));
