@@ -231,6 +231,48 @@ const updateCategoryView = async (req, res, next) => {
 }
 
 
+
+// ---------------------------------------------
+// ELIMINAR CATEGORÍA
+// ---------------------------------------------
+
+const deleteCategoryView = async (req, res, next) => {
+
+    try {
+
+        const category = await Category.findById(req.params.id);
+
+        if (!category) {
+            return res.redirect(303, "/admin/categories?message=not-found");
+        }
+
+        // Comprobar si existen productos asociados
+        const hasProducts = await Product.exists({
+            category: category._id
+        });
+
+        if (hasProducts) {
+            return res.redirect(303, "/admin/categories?message=has-products");
+        }
+
+        await Category.findByIdAndDelete(category._id);
+
+        return res.redirect(303, "/admin/categories?message=deleted");
+
+    } catch (error) {
+
+        if (error.name === "CastError") {
+            return res.redirect(303, "/admin/categories?message=not-found");
+        }
+
+        next(error);
+
+    }
+
+};
+
+
+
 // ---------------------------------------------
 // MOSTRAR FORMULARIO DE EDICIÓN
 // ---------------------------------------------
@@ -425,5 +467,6 @@ module.exports = {
     showCreateCategory,
     createCategoryView,
     showEditCategory,
-    updateCategoryView
+    updateCategoryView,
+    toggleCategoryStatus
 };
