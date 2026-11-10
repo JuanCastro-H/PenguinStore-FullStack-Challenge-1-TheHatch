@@ -171,5 +171,15 @@ router.post(
     adminViewController.updateProductView
 );
 
+// --- Cambiar Estado De Un Producto ---
+router.post(
+    "/products/:id/toggle-status",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.toggleProductStatus
+);
+
+
 // --- EXPORTAR ROUTERS ---
 module.exports = router;
