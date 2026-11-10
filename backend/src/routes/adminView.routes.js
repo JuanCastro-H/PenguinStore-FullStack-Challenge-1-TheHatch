@@ -162,6 +162,14 @@ router.get(
     adminViewController.showEditProduct
 );
 
+// --- Actualizar Un Producto ---
+router.post(
+    "/products/:id/edit",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.updateProductView
+);
 
 // --- EXPORTAR ROUTERS ---
 module.exports = router;
