@@ -195,6 +195,43 @@ const createCategoryView = async (req, res, next) => {
 
 
 // ---------------------------------------------
+// ACTUALIZAR CATEGORÍA
+// ---------------------------------------------
+
+const updateCategoryView = async (req, res, next) => {
+
+    try {
+        const { name, description } = req.body;
+
+        const category = await Category.findById(req.params.id);
+
+        if (!category) {
+            return res.status(404).send("Categoría no encontrada");
+        }
+
+        category.name = name;
+        category.description = description;
+
+        await category.save()
+
+        return res.redirect(303, "/admin/categories");
+    
+    } catch (error) {
+
+        if (error.code === 11000) {
+            return res.status(409).send( "Ya existe una categoría con ese nombre o slug");
+        }
+
+        if (error.name === "ValidationError") {
+            return res.status(400).send(error.message);
+        }
+
+        next(error);
+    }
+}
+
+
+// ---------------------------------------------
 // MOSTRAR FORMULARIO DE EDICIÓN
 // ---------------------------------------------
 
@@ -357,5 +394,7 @@ module.exports = {
     logout,
     showCategories,
     showCreateCategory,
-    createCategoryView
+    createCategoryView,
+    showEditCategory,
+    updateCategoryView
 };
