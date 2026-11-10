@@ -1,7 +1,7 @@
 
 const crypto = require("crypto");
 
-const { hashCsrfToken } = require("../services/csrf.service");
+const { hashCsrfToken, hashCsrfToken } = require("../services/csrf.service");
 
 
 // =============================================
@@ -168,6 +168,42 @@ const verifyLoginCsrfToken = (req, res, next) => {
 
 
 };
+
+
+
+// ---------------------------------------------
+// GENERAR CSRF PARA LA TIENDA PÚBLICA
+// ---------------------------------------------
+
+const providePublicCsrfToken = (req, res, next) => {
+
+    let token = req.cookies?.storeCsrfToken;
+
+    const tokenPattern = /^[a-f0-9]{64}$/i;
+
+    if (
+        typeof token !== "string" ||
+        !tokenPattern.test(token)
+    ) {
+        token = generateCsrfToken();
+    }
+
+    res.cookie("storeCsrfToken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/store",
+        maxAge: 15 * 60 * 1000
+    });
+
+    // El formulario Pug podrá utilizar esta variable.
+    res.locals.csrfToken = token;
+
+    next();
+};
+
+
+
 
 // =============================================
 // EXPORTAR MIDDLEWARE
