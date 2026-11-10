@@ -46,7 +46,7 @@ router.post(
 
 router.get(
     "/me",
-    authenticateToken,
+    authenticateToken(),
     authController.getCurrentUser
 );
 
@@ -57,7 +57,7 @@ router.get(
 
 router.post(
     "/logout",
-    authenticateToken,
+    authenticateToken(),
     verifyCsrfToken,
     authController.logout
 );
