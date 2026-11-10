@@ -1,0 +1,67 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title= title
+        link(rel="stylesheet", href="/css/styles.css")
+
+    body.bg-slate-950.min-h-screen.flex.items-center.justify-center.p-6
+
+        main.bg-white.rounded-2xl.shadow-xl.p-8.w-full.max-w-md
+
+            header.text-center.mb-8
+
+                h1.text-3xl.font-bold.text-green-700
+                    | Penguin Store 🐧
+
+                p.text-gray-500.mt-2
+                    | Panel de administración
+
+            if error
+                div.bg-red-100.text-red-700.p-3.rounded-lg.mb-4
+                    p= error
+
+            form(action="/admin/login" method="POST" class="space-y-5")
+
+                input(
+                    type="hidden"
+                    name="_csrf"
+                    value=csrfToken
+                )
+
+                div
+                    label.block.text-sm.font-semibold.text-gray-700(for="email")
+                        | Correo electrónico
+
+                    input(
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        autocomplete="username"
+                        class="w-full mt-2 p-3 border border-gray-300 rounded-lg"
+                    )
+
+                div
+                    label.block.text-sm.font-semibold.text-gray-700(for="password")
+                        | Contraseña
+
+                    input(
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        class="w-full mt-2 p-3 border border-gray-300 rounded-lg"
+                    )
+
+                button(
+                    type="submit"
+                    class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 rounded-lg"
+                )
+                    | Iniciar sesión
+
+            footer.text-center.mt-6.text-sm.text-gray-400
+                | Penguin Store — Administración
