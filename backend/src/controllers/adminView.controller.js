@@ -797,6 +797,38 @@ const updateProductView = async (req, res, next) => {
 
 
 
+// ---------------------------------------------
+// CAMBIAR ESTADO DEL PRODUCTO
+// ---------------------------------------------
+
+const toggleProductStatus = async (req, res, next) => {
+    try {
+        // Buscar producto
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.redirect(303, "/admin/products?message=not-found");
+        }
+
+        // Invertir estado
+        product.isActive = !product.isActive;
+
+        // Guardar cambios
+        await product.save();
+
+        return res.redirect(303, "/admin/products?message=status-updated");
+
+    } catch (error) {
+        if (error.name === "CastError") {
+            return res.redirect(303, "/admin/products?message=not-found");
+        }
+
+        next(error);
+    }
+};
+
+
+
 
 
 // --- Exportar Logica De Los Controlladores ---
