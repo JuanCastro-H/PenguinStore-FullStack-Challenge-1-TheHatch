@@ -1,0 +1,110 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title= title
+
+    body
+        main
+            h1 Penguin Store
+            h2 Finalizar compra
+
+            if products.length === 0
+                p Actualmente no tenemos productos disponibles.
+            else
+                form(action="/store/orders" method="POST")
+
+                    //- =================================
+                    //- PROTECCIÓN CSRF
+                    //- =================================
+
+                    input(
+                        type="hidden"
+                        name="_csrf"
+                        value=csrfToken
+                    )
+
+                    //- =================================
+                    //- DATOS DEL CLIENTE
+                    //- =================================
+
+                    section
+                        h3 Datos del cliente
+
+                        label(for="customer-name") Nombre completo
+                        input(
+                            id="customer-name"
+                            type="text"
+                            name="customer[name]"
+                            maxlength="100"
+                            required
+                        )
+
+                        label(for="customer-email") Correo electrónico
+                        input(
+                            id="customer-email"
+                            type="email"
+                            name="customer[email]"
+                            maxlength="150"
+                            required
+                        )
+
+                        label(for="customer-address") Dirección de entrega
+                        textarea(
+                            id="customer-address"
+                            name="customer[address]"
+                            maxlength="250"
+                            required
+                        )
+
+                    //- =================================
+                    //- PRODUCTOS DISPONIBLES
+                    //- =================================
+
+                    section
+                        h3 Productos disponibles
+
+                        each product, index in products
+                            article
+                                h4= product.name
+
+                                p= product.description
+
+                                p
+                                    strong Precio:
+                                    |  G. #{product.price}
+
+                                if product.category
+                                    p
+                                        | Categoría:
+                                        |  #{product.category.name}
+
+                                p
+                                    | Stock disponible:
+                                    |  #{product.stock}
+
+                                input(
+                                    type="hidden"
+                                    name=`items[${index}][productId]`
+                                    value=product._id
+                                )
+
+                                label(for=`quantity-${index}`) Cantidad
+
+                                input(
+                                    id=`quantity-${index}`
+                                    type="number"
+                                    name=`items[${index}][quantity]`
+                                    min="0"
+                                    max=product.stock
+                                    value="0"
+                                    required
+                                )
+
+                    //- =================================
+                    //- ENVIAR PEDIDO
+                    //- =================================
+
+                    button(type="submit") Confirmar pedido

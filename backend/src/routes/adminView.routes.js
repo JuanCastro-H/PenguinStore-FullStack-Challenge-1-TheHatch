@@ -6,7 +6,6 @@ const router = express.Router();
 
 const adminViewController = require("../controllers/adminView.controller");
 
-
 // --- Importar Middlewares ---
 
 const { authenticateToken } = require("../middleware/auth.middleware");
@@ -188,6 +187,32 @@ router.post(
     verifyCsrfToken,
     adminViewController.deleteProductView
 );
+
+
+// =============================================
+// ADMINISTRACIÓN DE PEDIDOS
+// =============================================
+
+// --- Mostrar Pedidos ---
+
+router.get(
+    "/orders",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    adminViewController.showOrders
+);
+
+
+// --- Marcar Pedido Como Entregado ---
+
+router.post(
+    "/orders/:orderId/deliver",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.markOrderDelivered
+);
+
 
 // --- EXPORTAR ROUTERS ---
 module.exports = router;

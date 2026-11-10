@@ -1,0 +1,135 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title= title
+        link(rel="stylesheet" href="/css/output.css")
+
+    body
+        main.container.mx-auto.p-8
+
+            // =============================================
+            // ENCABEZADO
+            // =============================================
+
+            h1.text-3xl.font-bold.mb-6 Administración de productos
+
+            // ---------------------------------------------
+            // MENSAJES
+            // ---------------------------------------------
+
+            if message
+                p(class="p-3 rounded border mb-4")= message
+
+            p.mb-4
+                | Hola, #{user.email}
+
+            // =============================================
+            // NAVEGACIÓN
+            // =============================================
+
+            a(
+                href="/admin/dashboard"
+                class="text-blue-600 underline"
+            ) Volver al dashboard
+
+            section.my-6
+                a(
+                    href="/admin/products/new"
+                    class="inline-block bg-blue-600 text-white px-4 py-2 rounded"
+                ) Crear producto
+
+            // =============================================
+            // LISTADO DE PRODUCTOS
+            // =============================================
+
+            if products.length === 0
+                p No hay productos registrados.
+
+            else
+                section(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
+
+                    each product in products
+                        article(class="p-6 rounded-lg shadow border")
+
+                            // ---------------------------------------------
+                            // INFORMACIÓN DEL PRODUCTO
+                            // ---------------------------------------------
+
+                            h2.text-xl.font-bold= product.name
+
+                            p.my-2= product.description
+
+                            p
+                                strong Precio:
+                                |  #{product.price}
+
+                            p
+                                strong Stock:
+                                |  #{product.stock}
+
+                            p
+                                strong Categoría:
+                                |  #{product.category ? product.category.name : "Sin categoría"}
+
+                            p
+                                strong Estado:
+                                |  #{product.isActive ? "Activo" : "Inactivo"}
+
+                            // ---------------------------------------------
+                            // IMAGEN DEL PRODUCTO
+                            // ---------------------------------------------
+
+                            if product.images && product.images.length > 0
+                                img(
+                                    src=product.images[0]
+                                    alt=product.name
+                                    class="w-full h-48 object-cover rounded mt-3"
+                                )
+                            else
+                                p.text-sm.text-gray-500.mt-3 Sin imágenes disponibles.
+
+                            // ---------------------------------------------
+                            // EDITAR PRODUCTO
+                            // ---------------------------------------------
+
+                            a(
+                                href=`/admin/products/${product._id}/edit`
+                                class="inline-block text-blue-600 underline mt-4"
+                            ) Editar
+
+                            // ---------------------------------------------
+                            // ACTIVAR / DESACTIVAR PRODUCTO
+                            // ---------------------------------------------
+
+                            form(
+                                action=`/admin/products/${product._id}/toggle-status`
+                                method="POST"
+                                class="mt-3"
+                            )
+                                input(type="hidden" name="_csrf" value=csrfToken)
+
+                                button(
+                                    type="submit"
+                                    class=product.isActive
+                                        ? "bg-red-600 text-white px-3 py-2 rounded"
+                                        : "bg-green-600 text-white px-3 py-2 rounded"
+                                )= product.isActive ? "Desactivar" : "Activar"
+
+                            // ---------------------------------------------
+                            // ELIMINAR PRODUCTO
+                            // ---------------------------------------------
+
+                            form(
+                                action=`/admin/products/${product._id}/delete`
+                                method="POST"
+                                class="mt-3"
+                            )
+                                input(type="hidden" name="_csrf" value=csrfToken)
+
+                                button(
+                                    type="submit"
+                                    class="bg-red-700 text-white px-3 py-2 rounded"
+                                ) Eliminar

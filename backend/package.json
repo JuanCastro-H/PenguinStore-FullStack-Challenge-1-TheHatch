@@ -11,7 +11,9 @@
     "seed": "node scripts/seed.js",
     "test:watch": "node --test --watch",
     "dev": "node src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "css:build": "npx @tailwindcss/cli -i ./src/public/css/input.css -o ./src/public/css/styles.css --minify",
+    "css:watch": "npx @tailwindcss/cli -i ./src/public/css/input.css -o ./src/public/css/styles.css --watch"
   },
   "keywords": [],
   "author": "",

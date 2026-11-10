@@ -2,7 +2,8 @@
 
 const Category = require("../models/Category");
 const Product = require("../models/Product");
-
+const Order = require("../models/Order");
+const mongoose = require("mongoose");
 
 const { loginUser, logoutUser } = require("../services/auth.service");
 const { generateCsrfToken } = require("../services/csrf.service");
@@ -873,6 +874,87 @@ const deleteProductView = async (req, res, next) => {
 
 
 
+
+// =============================================
+// ADMINISTRACIÓN DE PEDIDOS
+// =============================================
+
+// ---------------------------------------------
+// MOSTRAR LISTA DE PEDIDOS
+// ---------------------------------------------
+
+const showOrders = async (req, res, next) => {
+
+    try {
+
+        const orders = await Order.find()
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return res.render("admin/orders/list", {
+            title: "Administrar pedidos",
+            orders,
+            csrfToken: req.cookies.csrfToken,
+            message: req.query.message
+        });
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+
+// ---------------------------------------------
+// MARCAR PEDIDO COMO ENTREGADO
+// ---------------------------------------------
+
+const markOrderDelivered = async (req, res, next) => {
+
+    try {
+
+        const { orderId } = req.params;
+
+        // --- Validar ID ---
+
+        if (!mongoose.isValidObjectId(orderId)) {
+            return res.redirect(
+                303,
+                "/admin/orders?message=not-found"
+            );
+        }
+
+        // --- Actualizar Estado ---
+
+        const order = await Order.findByIdAndUpdate(
+            orderId,
+            {
+                status: "delivered"
+            },
+            {
+                returnDocument: "after"
+            }
+        );
+
+        if (!order) {
+            return res.redirect(
+                303,
+                "/admin/orders?message=not-found"
+            );
+        }
+
+        return res.redirect(
+            303,
+            "/admin/orders?message=delivered"
+        );
+
+    } catch (error) {
+        next(error);
+    }
+
+};
+
+
 // --- Exportar Logica De Los Controlladores ---
 module.exports = {
     showLogin,
@@ -892,5 +974,7 @@ module.exports = {
     showEditProduct,
     updateProductView,
     toggleProductStatus,
-    deleteProductView
+    deleteProductView,
+    showOrders,
+    markOrderDelivered
 };

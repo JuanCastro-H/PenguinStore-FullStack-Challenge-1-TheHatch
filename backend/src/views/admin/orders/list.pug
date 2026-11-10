@@ -1,0 +1,88 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title= title
+
+    body
+        main
+            h1 Penguin Store
+            h2 Administración de pedidos
+
+            a(href="/admin") Volver al panel administrativo
+
+            //- =================================
+            //- MENSAJES
+            //- =================================
+
+            if message === "delivered"
+                p Pedido marcado como entregado correctamente.
+
+            if message === "not-found"
+                p No se encontró el pedido solicitado.
+
+            //- =================================
+            //- LISTA DE PEDIDOS
+            //- =================================
+
+            if orders.length === 0
+                p Todavía no hay pedidos registrados.
+
+            else
+                each order in orders
+                    article
+                        hr
+
+                        h3 Pedido ##{order._id}
+
+                        p
+                            strong Cliente:
+                            |  #{order.customer.name}
+
+                        p
+                            strong Correo:
+                            |  #{order.customer.email}
+
+                        p
+                            strong Dirección:
+                            |  #{order.customer.address}
+
+                        p
+                            strong Fecha:
+                            |  #{order.createdAt.toLocaleString("es-PY")}
+
+                        h4 Productos
+
+                        each item in order.items
+                            p
+                                | #{item.name}
+                                |  — Cantidad: #{item.quantity}
+                                |  — Precio: G. #{item.price}
+                                |  — Subtotal: G. #{item.subtotal}
+
+                        p
+                            strong Total:
+                            |  G. #{order.total}
+
+                        p
+                            strong Estado:
+                            if order.status === "pending"
+                                |  Pendiente
+                            else
+                                |  Entregado
+
+                        if order.status === "pending"
+                            form(
+                                action=`/admin/orders/${order._id}/deliver`
+                                method="POST"
+                            )
+                                input(
+                                    type="hidden"
+                                    name="_csrf"
+                                    value=csrfToken
+                                )
+
+                                button(type="submit")
+                                    | Marcar como entregado

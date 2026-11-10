@@ -1,0 +1,95 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title= title
+        link(rel="stylesheet" href="/css/output.css")
+
+    body
+        main.container.mx-auto.p-8
+            h1.text-3xl.font-bold.mb-6 Administración de categorías
+
+            // --- Mensajes De Respuesta ---
+            if message
+                p(class="p-3 rounded border mb-4")= message
+
+            // --- Información Del Administrador ---
+            p.mb-4
+                | Hola, #{user.email}
+
+            // --- Navegación ---
+            a(
+                href="/admin/dashboard"
+                class="text-blue-600 underline"
+            ) Volver al dashboard
+
+            // --- Crear Nueva Categoría ---
+            section.my-6
+                a(
+                    href="/admin/categories/new"
+                    class="inline-block bg-blue-600 text-white px-4 py-2 rounded"
+                ) Crear categoría
+
+            // =============================================
+            // LISTADO DE CATEGORÍAS
+            // =============================================
+
+            if categories.length === 0
+
+                p No hay categorías registradas.
+
+            else
+
+                section(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
+
+                    each category in categories
+
+                        article(class="p-6 rounded-lg shadow border")
+
+                            // --- Información De La Categoría ---
+                            h2.text-xl.font-bold= category.name
+
+                            p.my-2= category.description || "Sin descripción"
+
+                            p
+                                strong Estado:
+                                |  #{category.isActive ? "Activa" : "Inactiva"}
+
+                            p.text-sm.text-gray-500.mt-2
+                                | Slug: #{category.slug}
+
+                            // --- Editar Categoría ---
+                            a(
+                                href=`/admin/categories/${category._id}/edit`
+                                class="text-blue-600 underline"
+                            ) Editar
+
+                            // --- Activar / Desactivar Categoría ---
+                            form(
+                                action=`/admin/categories/${category._id}/toggle-status`
+                                method="POST"
+                                class="mt-3"
+                            )
+                                input(type="hidden" name="_csrf" value=csrfToken)
+
+                                button(
+                                    type="submit"
+                                    class=category.isActive
+                                        ? "bg-red-600 text-white px-3 py-2 rounded"
+                                        : "bg-green-600 text-white px-3 py-2 rounded"
+                                )= category.isActive ? "Desactivar" : "Activar"
+
+                            // --- Eliminar Categoría ---
+                            form(
+                                action=`/admin/categories/${category._id}/delete`
+                                method="POST"
+                                class="mt-3"
+                            )
+                                input(type="hidden" name="_csrf" value=csrfToken)
+
+                                button(
+                                    type="submit"
+                                    class="bg-red-700 text-white px-3 py-2 rounded"
+                                ) Eliminar

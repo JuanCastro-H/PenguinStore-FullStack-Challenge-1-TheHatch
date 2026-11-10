@@ -1,0 +1,33 @@
+h1.text-3xl.font-bold.mb-6= category ? "Editar categoría" : "Crear categoría"
+
+form(
+    action=category ? `/admin/categories/${category._id}/edit` : "/admin/categories"
+    method="POST"
+    class="mt-6 space-y-4"
+)
+    input(type="hidden" name="_csrf" value=csrfToken)
+
+    div
+        label.block.font-bold(for="name") Nombre
+        input#name(
+            type="text"
+            name="name"
+            required
+            maxlength="50"
+            value=category ? category.name : ""
+            class="border rounded p-2 w-full"
+        )
+
+    div
+        label.block.font-bold(for="description") Descripción
+        textarea#description(
+            name="description"
+            maxlength="250"
+            rows="4"
+            class="border rounded p-2 w-full"
+        )= category ? category.description : ""
+
+    button(
+        type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded"
+    )= category ? "Guardar cambios" : "Crear categoría"

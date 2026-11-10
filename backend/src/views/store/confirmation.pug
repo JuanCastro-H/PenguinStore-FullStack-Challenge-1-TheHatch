@@ -1,0 +1,32 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title= title
+
+    body
+        main
+            h1 ¡Gracias por comprar en Penguin Store!
+
+            h2 ¡Tu pedido fue registrado correctamente!
+
+            p
+                strong Número de pedido:
+                |  #{order._id}
+
+            h3 Resumen de compra
+
+            each item in order.items
+                article
+                    h4= item.name
+                    p Cantidad: #{item.quantity}
+                    p Precio unitario: G. #{item.price}
+                    p Subtotal: G. #{item.subtotal}
+
+            h3 Total: G. #{order.total}
+
+            p Estado: #{order.status === "pending" ? "Pendiente" : "Entregado"}
+
+            a(href="/store/checkout") Volver a la tienda

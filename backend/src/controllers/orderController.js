@@ -76,12 +76,33 @@ const createOrder = async (req, res, next) => {
 
         for (const item of items) {
 
+            // --- Validar Estructura Del Elemento ---
+
+            if (!item || typeof item !== "object") {
+                return res.status(400).send(
+                    "Los datos de los productos no son válidos."
+                );
+            }
+
             const { productId, quantity } = item;
 
+            const normalizedQuantity = Number(quantity);
+
+
+            // --- Ignorar Productos No Seleccionados ---
+
+            if (normalizedQuantity === 0) {
+                continue;
+            }
+
+
+            // --- Validar Producto Y Cantidad ---
+
             if (
-                !mongoose.isValidObjectId(productId) ||   // Validaa formato del ID
-                !Number.isInteger(Number(quantity)) ||    // Convertir txt a numero y verificar que sea entero.
-                Number(quantity) < 1                      // Y que pida al menos 1 unidad
+                typeof productId !== "string" ||
+                !mongoose.isValidObjectId(productId) ||
+                !Number.isSafeInteger(normalizedQuantity) ||
+                normalizedQuantity < 1
             ) {
                 return res.status(400).send(
                     "Los productos o las cantidades no son válidos."
@@ -89,14 +110,33 @@ const createOrder = async (req, res, next) => {
             }
 
 
-            // --- Cantidad Normalizada ---
-            const normalizedQuantity = Number(quantity);
+            // --- Acumular Cantidades Repetidas ---
 
+            const normalizedProductId = productId.toString();
 
-            // --- Si el ID ya existe en el Map, suma la nueva cantidad; si no, inicia en 0 y suma
+            const accumulatedQuantity =
+                (requestedItems.get(normalizedProductId) || 0)
+                + normalizedQuantity;
+
+            if (!Number.isSafeInteger(accumulatedQuantity)) {
+                return res.status(400).send(
+                    "La cantidad solicitada no es válida."
+                );
+            }
+
             requestedItems.set(
-                productId,
-                (requestedItems.get(productId) || 0) + normalizedQuantity
+                normalizedProductId,
+                accumulatedQuantity
+            );
+
+        }
+
+
+        // --- Comprobar Que Se Seleccionó Algún Producto ---
+
+        if (requestedItems.size === 0) {
+            return res.status(400).send(
+                "Debes seleccionar al menos un producto."
             );
         }
 
@@ -174,6 +214,7 @@ const createOrder = async (req, res, next) => {
 
         for (const item of orderItems) {
             
+            
             // --- Busca producto atómicamente y asegurar que tenga stock suficiente ---
             const updatedProduct = await Product.findOneAndUpdate(
                 {
@@ -185,16 +226,20 @@ const createOrder = async (req, res, next) => {
                     $inc: { stock: -item.quantity }  // Decrementa la cantidad de forma atómica en la BD
                 },
                 {
-                    new: true                        // Devuelve el documento modificado
+                    returnDocument: "after"          // Devuelve el documento modificado
                 }
             );
 
             // --- Comprobar que stock esta disponible aun ---
 
             if (!updatedProduct) {
-                return res.status(409).send(
+                const error = new Error(
                     `Ya no hay stock suficiente para ${item.name}.`
                 );
+
+                error.statusCode = 409;
+
+                throw error;
             }
 
             // --- Registrar Producto ---
@@ -244,7 +289,14 @@ const createOrder = async (req, res, next) => {
 
         }
 
-        // --- Enviar Error Al Sistema De Manejo De Errores Globales ---
+        // --- Responder Errores Controlados ---
+
+        if (error.statusCode) {
+            return res.status(error.statusCode).send(error.message);
+        }
+
+        // --- Delegar Errores Inesperados ---
+
         next(error);
 
     }

@@ -1,7 +1,7 @@
 
 const crypto = require("crypto");
 
-const { hashCsrfToken, hashCsrfToken } = require("../services/csrf.service");
+const { generateCsrfToken, hashCsrfToken } = require("../services/csrf.service");
 
 
 // =============================================
@@ -253,5 +253,7 @@ const verifyPublicCsrfToken = (req, res, next) => {
 
 module.exports = {
     verifyCsrfToken,
-    verifyLoginCsrfToken
+    verifyLoginCsrfToken,
+    providePublicCsrfToken,
+    verifyPublicCsrfToken
 };

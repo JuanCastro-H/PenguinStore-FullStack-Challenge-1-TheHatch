@@ -1,0 +1,175 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title= title
+        link(rel="stylesheet" href="/css/output.css")
+
+    body
+        main.container.mx-auto.p-8
+
+            // =============================================
+            // ENCABEZADO
+            // =============================================
+
+            h1.text-3xl.font-bold.mb-6= title
+
+            a(
+                href="/admin/products"
+                class="text-blue-600 underline"
+            ) Volver al listado
+
+            // =============================================
+            // MENSAJES DE ERROR
+            // =============================================
+
+            if error
+                p(class="p-3 bg-red-100 text-red-700 rounded my-4")= error
+
+            // =============================================
+            // FORMULARIO DE PRODUCTO
+            // =============================================
+
+            form(
+                action=product ? `/admin/products/${product._id}/edit` : "/admin/products"
+                method="POST"
+                class="max-w-2xl mt-6 space-y-4"
+            )
+
+                input(type="hidden" name="_csrf" value=csrfToken)
+
+                // ---------------------------------------------
+                // NOMBRE
+                // ---------------------------------------------
+
+                div
+                    label(for="name" class="block font-bold mb-1") Nombre
+                    input(
+                        type="text"
+                        id="name"
+                        name="name"
+                        value=product ? product.name : ""
+                        required
+                        maxlength="150"
+                        class="w-full border rounded p-2"
+                    )
+
+                // ---------------------------------------------
+                // DESCRIPCIÓN
+                // ---------------------------------------------
+
+                div
+                    label(for="description" class="block font-bold mb-1") Descripción
+                    textarea(
+                        id="description"
+                        name="description"
+                        required
+                        maxlength="650"
+                        rows="4"
+                        class="w-full border rounded p-2"
+                    )= product ? product.description : ""
+
+                // ---------------------------------------------
+                // PRECIO
+                // ---------------------------------------------
+
+                div
+                    label(for="price" class="block font-bold mb-1") Precio
+                    input(
+                        type="number"
+                        id="price"
+                        name="price"
+                        value=product ? product.price : ""
+                        min="0"
+                        step="1"
+                        required
+                        class="w-full border rounded p-2"
+                    )
+
+                // ---------------------------------------------
+                // STOCK
+                // ---------------------------------------------
+
+                div
+                    label(for="stock" class="block font-bold mb-1") Stock
+                    input(
+                        type="number"
+                        id="stock"
+                        name="stock"
+                        value=product ? product.stock : "0"
+                        min="0"
+                        step="1"
+                        required
+                        class="w-full border rounded p-2"
+                    )
+
+                // ---------------------------------------------
+                // CATEGORÍA
+                // ---------------------------------------------
+
+                div
+                    label(for="category" class="block font-bold mb-1") Categoría
+
+                    select(
+                        id="category"
+                        name="category"
+                        required
+                        class="w-full border rounded p-2"
+                    )
+                        option(value="") Selecciona una categoría
+
+                        each category in categories
+                            option(
+                                value=category._id
+                                selected=product && product.category.toString() === category._id.toString()
+                            )= category.name
+
+                // ---------------------------------------------
+                // IMÁGENES
+                // ---------------------------------------------
+
+                div
+                    label(for="images" class="block font-bold mb-1") URLs de imágenes
+
+                    textarea(
+                        id="images"
+                        name="images"
+                        rows="4"
+                        placeholder="Una URL por línea"
+                        class="w-full border rounded p-2"
+                    )= product && product.images ? (Array.isArray(product.images) ? product.images.join("\n") : product.images) : ""
+
+                    p.text-sm.text-gray-500 Una URL por línea. Campo opcional.
+
+                // ---------------------------------------------
+                // ESTADO
+                // ---------------------------------------------
+
+                div
+                    label(for="isActive" class="block font-bold mb-1") Estado
+
+                    select(
+                        id="isActive"
+                        name="isActive"
+                        class="w-full border rounded p-2"
+                    )
+                        option(
+                            value="true"
+                            selected=!product || product.isActive === true || product.isActive === "true"
+                        ) Activo
+
+                        option(
+                            value="false"
+                            selected=product && (product.isActive === false || product.isActive === "false")
+                        ) Inactivo
+
+                // ---------------------------------------------
+                // ENVIAR FORMULARIO
+                // ---------------------------------------------
+
+                button(
+                    type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded"
+                )= product ? "Guardar cambios" : "Crear producto"
