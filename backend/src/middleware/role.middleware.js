@@ -24,6 +24,11 @@ const authorizeRoles = (...allowedRoles) => {
         // --- Comprobar Que El Usuario Este Autenticado ---
 
         if (!req.user) {
+
+            if (req.authRedirect) {
+                return res.redirect(303, "/admin/login");
+            }
+
             return res.status(401).json({
                 message: "Authentication required"
             });
@@ -38,11 +43,20 @@ const authorizeRoles = (...allowedRoles) => {
         // --- Comprobar Si Tiene Un Rol Permitido ---
 
         if (!allowedRoles.includes(userRole)) {
+
+            if (req.authRedirect) {
+
+                return res.status(403).render("admin/forbidden", {
+                    title: "Acceso denegado | Penguin Store"
+                });
+
+            }
+
             return res.status(403).json({
                 message: "Access denied: insufficient permissions"
             });
+                
         }
-
 
         // --- Continuar Con La Peticion ---
 
