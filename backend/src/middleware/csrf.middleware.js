@@ -204,6 +204,48 @@ const providePublicCsrfToken = (req, res, next) => {
 
 
 
+// ---------------------------------------------
+// VERIFICAR CSRF DE LA TIENDA PÚBLICA
+// ---------------------------------------------
+
+const verifyPublicCsrfToken = (req, res, next) => {
+
+    const cookieToken = req.cookies?.storeCsrfToken;
+    const formToken = req.body?._csrf;
+
+    if (
+        typeof cookieToken !== "string" ||
+        typeof formToken !== "string"
+    ) {
+        return res.status(403).send(
+            "No se pudo verificar la solicitud. Recarga la página e inténtalo nuevamente."
+        );
+    }
+
+    const tokenPattern = /^[a-f0-9]{64}$/i;
+
+    if (
+        !tokenPattern.test(cookieToken) ||
+        !tokenPattern.test(formToken)
+    ) {
+        return res.status(403).send(
+            "Token CSRF inválido."
+        );
+    }
+
+    const cookieBuffer = Buffer.from(cookieToken, "hex");
+    const formBuffer = Buffer.from(formToken, "hex");
+
+    if (!crypto.timingSafeEqual(cookieBuffer, formBuffer)) {
+        return res.status(403).send(
+            "La verificación CSRF ha fallado."
+        );
+    }
+
+    next();
+};
+
+
 
 // =============================================
 // EXPORTAR MIDDLEWARE
