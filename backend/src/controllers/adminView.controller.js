@@ -540,6 +540,89 @@ const showCreateProduct = async (req, res, next) => {
 
 
 
+// ---------------------------------------------
+// CREAR PRODUCTO
+// ---------------------------------------------
+
+const createProductView = async (req, res, next) => {
+    try {
+        // Obtener datos del formulario
+        const {
+            name,
+            description,
+            price,
+            stock,
+            category,
+            images
+        } = req.body;
+
+        // Convertir las imágenes en un array
+        const imageArray = images
+            ? images.split("\n")
+                .map(image => image.trim())
+                .filter(image => image.length > 0)
+            : [];
+
+        // Verificar que la categoría exista y esté activa
+        const selectedCategory = await Category.findOne({
+            _id: category,
+            isActive: true
+        });
+
+        if (!selectedCategory) {
+            const categories = await Category.find({ isActive: true })
+                .sort({ name: 1 })
+                .lean();
+
+            const csrfToken = generateCsrfToken(res);
+
+            return res.status(400).render("admin/products/form", {
+                title: "Crear producto",
+                user: req.user,
+                csrfToken,
+                categories,
+                product: req.body,
+                error: "La categoría seleccionada no existe o está inactiva."
+            });
+        }
+
+        // Crear producto
+        await Product.create({
+            name,
+            description,
+            price,
+            stock,
+            category,
+            images: imageArray,
+            isActive: req.body.isActive === "true"
+        });
+
+        // Redirigir al listado
+        return res.redirect(303, "/admin/products");
+
+    } catch (error) {
+        // Manejar errores de validación
+        if (error.name === "ValidationError" || error.name === "CastError") {
+            const categories = await Category.find({ isActive: true })
+                .sort({ name: 1 })
+                .lean();
+
+            const csrfToken = generateCsrfToken(res);
+
+            return res.status(400).render("admin/products/form", {
+                title: "Crear producto",
+                user: req.user,
+                csrfToken,
+                categories,
+                product: req.body,
+                error: "Verifica los datos ingresados. Algunos campos no son válidos."
+            });
+        }
+
+        next(error);
+    }
+};
+
 
 
 
