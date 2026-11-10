@@ -409,6 +409,72 @@ const deleteCategoryView = async (req, res, next) => {
 
 
 
+
+
+// ---------------------------------------------
+// MOSTRAR FORMULARIO DE EDICIÓN
+// ---------------------------------------------
+
+const showEditCategory =  async (req, res, next) => {
+
+    try {
+
+        const category = await Category.findById(req.params.id).lean();
+
+        if (!category) {
+            return res.status(404).send("Categoría no encontrada");
+        }
+        
+        res.render("admin/categories/form", {
+
+            title: "Editar Categoría | Penguin Store",
+            user: req.user,
+            csrfToken: req.cookies.csrfToken,
+            category,
+            error: null
+        
+        });
+    
+    } catch (error) {
+
+        next(error);
+        
+    }
+
+};
+
+
+
+// ---------------------------------------------
+// CAMBIAR ESTADO DE CATEGORÍA
+// ---------------------------------------------
+
+const toggleCategoryStatus = async (req, res, next) => {
+
+    try {
+
+        const category = await Category.findById(req.params.id);
+        
+        if (!category) {
+            return res.status(404).send("Cartegoría no encontrada");
+        }
+        
+        category.isActive = !category.isActive;
+
+        await category.save();
+        
+        return res.redirect(303, "/admin/categories");
+        
+    } catch (error) {
+        
+        next(error);
+        
+    }
+};
+
+
+
+
 // =============================================
 // ADMINISTRACIÓN DE PRODUCTOS
 // =============================================
@@ -442,66 +508,36 @@ const showProducts = async (req, res, next) => {
 };
 
 
+
 // ---------------------------------------------
-// MOSTRAR FORMULARIO DE EDICIÓN
+// MOSTRAR FORMULARIO DE CREACIÓN
 // ---------------------------------------------
 
-const showEditCategory =  async (req, res, next) => {
-
+const showCreateProduct = async (req, res, next) => {
     try {
+        // Obtener únicamente las categorías activas
+        const categories = await Category.find({ isActive: true })
+            .sort({ name: 1 })
+            .lean();
 
-        const category = await Category.findById(req.params.id).lean();
+        // Generar token CSRF
+        const csrfToken = generateCsrfToken(res);
 
-        if (!category) {
-            return res.status(404).send("Categoría no encontrada");
-        }
-
-        res.render("admin/categories/form", {
-
-            title: "Editar Categoría | Penguin Store",
+        // Renderizar formulario
+        return res.status(200).render("admin/products/form", {
+            title: "Crear producto",
             user: req.user,
-            csrfToken: req.cookies.csrfToken,
-            category,
+            csrfToken,
+            categories,
+            product: null,
             error: null
-        
         });
-    
+
     } catch (error) {
-
         next(error);
-    
-    }
-
-};
-
-
-
-// ---------------------------------------------
-// CAMBIAR ESTADO DE CATEGORÍA
-// ---------------------------------------------
-
-const toggleCategoryStatus = async (req, res, next) => {
-
-    try {
-
-        const category = await Category.findById(req.params.id);
-
-        if (!category) {
-            return res.status(404).send("Cartegoría no encontrada");
-        }
-
-        category.isActive = !category.isActive;
-
-        await category.save();
-
-        return res.redirect(303, "/admin/categories");
-    
-    } catch (error) {
-
-        next(error);
-    
     }
 };
+
 
 
 
@@ -519,5 +555,6 @@ module.exports = {
     showEditCategory,
     updateCategoryView,
     toggleCategoryStatus,
-    deleteCategoryView
+    deleteCategoryView,
+    showProducts
 };
