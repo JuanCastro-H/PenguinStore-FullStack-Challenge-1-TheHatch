@@ -141,10 +141,132 @@ const verifySession = async (token, req, authMethod) => {
 
 
 // =============================================
+// MANEJAR ERRORES DE AUTENTICACION
+// =============================================
+
+const handleAuthError = (req, res, status, message, redirect = false) => {
+
+    // --- Errores De JWT ---
+
+    if (
+        error.name === "TokenExpiredError" ||
+        error.name === "JsonWebTokenError" ||
+        error.name === "NotBeforeError"
+    ) {
+
+        if (redirect) {
+            
+            res.clearCookie("accessToken", {
+
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                path: "/"
+            
+            });
+
+            return res.redirect(303, "/admin/login");
+        }
+
+        return res.status(401).json({ message: "Invalid or expired token "});
+    }
+
+
+    // --- Cuenta Inactiva ---
+
+    if (error.message === "ACCOUNT_INACTIVE") {
+
+        if (redirect) {
+            
+            res.clearCookie("accessToken", {
+
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                path: "/"
+
+            });
+
+            return res.redirect(303, "/admin/login");
+        }
+
+        return res.status(403).json({ message: "Account inactive" });
+    }
+
+
+    // --- Rol No Encontrado ---
+
+    if (error.message === "USER_ROLE_NOT_FOUND") {
+
+        if (redirect) {
+
+            res.clearCookie("accessToken", {
+
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                path: "/"
+
+            });
+
+            return res.redirect(303, "/admin/login");
+        }
+
+        return res.status(403).json({ message: "User role not found" });
+    }
+
+    // --- Errores De Sesion ---
+
+    if (
+        error.message === "SESSION_NOT_FOUND" ||
+        error.message === "SESSION_REVOKED" ||
+        error.message === "SESSION_EXPIRED" ||
+        error.message === "INVALID_TOKEN" ||
+        error.message === "INVALID_SESSION_TOKEN" ||
+        error.message === "USER_NOT_FOUND"
+    ) {
+
+        if (redirect) {
+            
+            res.clearCookie("accessToken", {
+
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                path: "/"
+            
+            });
+
+            return res.redirect(303, "/admin/login");
+        }
+
+        return res.status(401).json({ message: "Invalid or inactive session "});
+
+    }
+
+
+    // --- Errores Desconocidos ---
+
+    return next(error);
+
+
+}
+
+
+
+
+// =============================================
 // MIDDLEWARE DE AUTENTICACIÓN
 // =============================================
 
-const authenticateToken = async (req, res, next) => {
+const authenticateToken = (options = {}) => async (req, res, next) => {
+
+    const redirect = options.redirect === true;
+
+    // --- Indentificar Peticiones Del Panel HTML ---
+
+    req.authRedirect = redirect;
+
 
     // --- Comprobar Configuracion De Seguridad ---
 
@@ -172,6 +294,11 @@ const authenticateToken = async (req, res, next) => {
         // --- Comprobar Formato Bearer ---
 
         if (type !== "Bearer" || !token || extra.length > 0) {
+
+            if (redirect) {
+                return res.redirect(303, "/admin/login");
+            }
+
             return res.status(401).json({
                 message: "Invalid authorization format"
             });
@@ -191,56 +318,9 @@ const authenticateToken = async (req, res, next) => {
 
         } catch (error) {
 
-            // --- Manejar Errores Del JWT ---
+            // --- Enviar Error Al Sistema De Manejo De Errores ---
+            return handleAuthError(error, req, res, next, redirect);
 
-            if (
-                error.name === "TokenExpiredError" ||
-                error.name === "JsonWebTokenError" ||
-                error.name === "NotBeforeError"
-            ) {
-                return res.status(401).json({
-                    message: "Invalid or expired token"
-                });
-            }
-
-
-            // --- Comprobar Estado De La Cuenta ---
-
-            if (error.message === "ACCOUNT_INACTIVE") {
-                return res.status(403).json({
-                    message: "Account inactive"
-                });
-            }
-
-
-            // --- Comprobar Rol Del Usuario ---
-
-            if (error.message === "USER_ROLE_NOT_FOUND") {
-                return res.status(403).json({
-                    message: "User role not found"
-                });
-            }
-
-
-            // --- Manejar Errores De Session ---
-
-            if (
-                error.message === "SESSION_NOT_FOUND" ||
-                error.message === "SESSION_REVOKED" ||
-                error.message === "SESSION_EXPIRED" ||
-                error.message === "INVALID_TOKEN" ||
-                error.message === "INVALID_SESSION_TOKEN" ||
-                error.message === "USER_NOT_FOUND"
-            ) {
-                return res.status(401).json({
-                    message: "Invalid or inactive session"
-                });
-            }
-
-
-            // --- Manejar Errores Desconocidos ---
-
-            return next(error);
         }
     }
 
@@ -257,6 +337,11 @@ const authenticateToken = async (req, res, next) => {
     // --- Manejar Error Si No Se Obtiene ---
 
     if (!token) {
+
+        if (redirect) {
+            return res.redirect(303, "/admin/login");
+        }
+
         return res.status(401).json({
             message: "Authentication required"
         });
@@ -276,56 +361,9 @@ const authenticateToken = async (req, res, next) => {
 
     } catch (error) {
 
-        // --- Manejar Errores Del JWT ---
-
-        if (
-            error.name === "TokenExpiredError" ||
-            error.name === "JsonWebTokenError" ||
-            error.name === "NotBeforeError"
-        ) {
-            return res.status(401).json({
-                message: "Invalid or expired token"
-            });
-        }
-
-
-        // --- Comprobar Estado De La Cuenta ---
-
-        if (error.message === "ACCOUNT_INACTIVE") {
-            return res.status(403).json({
-                message: "Account inactive"
-            });
-        }
-
-
-        // --- Comprobar Rol Del Usuario ---
-
-        if (error.message === "USER_ROLE_NOT_FOUND") {
-            return res.status(403).json({
-                message: "User role not found"
-            });
-        }
-
-
-        // --- Manejar Errores De Session ---
-
-        if (
-            error.message === "SESSION_NOT_FOUND" ||
-            error.message === "SESSION_REVOKED" ||
-            error.message === "SESSION_EXPIRED" ||
-            error.message === "INVALID_TOKEN" ||
-            error.message === "INVALID_SESSION_TOKEN" ||
-            error.message === "USER_NOT_FOUND"
-        ) {
-            return res.status(401).json({
-                message: "Invalid or inactive session"
-            });
-        }
-
-
-        // --- Manejar Errores Desconocidos ---
-
-        return next(error);
+        // --- Evniar Errores Al Sistema De Manejo De Errores ---
+        return handleAuthError(error, req, res, next, redirect);
+    
     }
 
 };
