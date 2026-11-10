@@ -127,7 +127,7 @@ const verifyLoginCsrfToken = (req, res, next) => {
     const cookieToken = req.cookies?.csrfToken;
     const formToken   = req.body?._csrf;
 
-
+    
     // --- Comprobar Que Existen Ambos Tokens ---
 
     if ( 
@@ -174,5 +174,6 @@ const verifyLoginCsrfToken = (req, res, next) => {
 // =============================================
 
 module.exports = {
-    verifyCsrfToken
+    verifyCsrfToken,
+    verifyLoginCsrfToken
 };
