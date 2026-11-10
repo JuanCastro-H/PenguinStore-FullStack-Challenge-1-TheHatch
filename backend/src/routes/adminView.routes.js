@@ -103,6 +103,16 @@ router.post(
 );
 
 
+// --- Eliminar Categoria ---
+router.post(
+    "/categories/:id/delete",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.deleteCategoryView
+);
+
+
 // ---------------------------------------------
 // CERRAR SESIÓN
 // ---------------------------------------------
