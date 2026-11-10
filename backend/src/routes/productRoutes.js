@@ -40,7 +40,7 @@ router.get("/:id", getProductById);
 // --- Crear Nuevo Producto ---
 router.post(
     "/",
-    authenticateToken,
+    authenticateToken(),
     authorizeRoles("admin"),
     verifyCsrfToken,
     createProduct
@@ -50,7 +50,7 @@ router.post(
 // --- Actualizar Producto Por Su ID ---
 router.put(
     "/:id",
-    authenticateToken,
+    authenticateToken(),
     authorizeRoles("admin"),
     verifyCsrfToken,
     updateProduct
@@ -60,7 +60,7 @@ router.put(
 // --- Eliminar Producto Por Su ID ---
 router.delete(
     "/:id",
-    authenticateToken,
+    authenticateToken(),
     authorizeRoles("admin"),
     verifyCsrfToken,
     deleteProduct
