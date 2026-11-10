@@ -19,7 +19,7 @@ const showLogin = (req, res) => {
     // --- Generar Token CSRF ---
 
     const csrfToken = generateCsrfToken();
-
+    
 
     // --- Configurar Cookie CSRF ---
     
@@ -36,20 +36,20 @@ const showLogin = (req, res) => {
     // --- Mensajes De Errores ---
     const errors = {
 
-    csrf: "La sesión del formulario expiró. Intenta nuevamente.",
+        csrf: "La sesión del formulario expiró. Intenta nuevamente.",
     credentials: "Correo o contraseña incorrectos.",
     unauthorized: "No tienes permisos para acceder al panel."
 
     };
 
     // --- Renderizar Plantilla De Login ---
-
+    
     res.render("auth/login", {
         title: "Iniciar Sesión | Penguin Store",
         csrfToken,
         error: errors[req.query.error] || null
     });
-
+    
 };
 
 
@@ -78,7 +78,7 @@ const showDashboard = async (req, res, next) => {
             categories
 
         });
-    
+        
     } catch (error) {
 
         next(error);
@@ -87,6 +87,133 @@ const showDashboard = async (req, res, next) => {
 
 };
 
+
+
+// -----------------------------------------
+// INICIAR SESSION AL PANEL ADMINISTRATIVO
+// -----------------------------------------
+
+const login = async (req, res, next) => {
+
+    try {
+
+        // --- Obtener Email Y Contraseña ---
+        const { email, password } = req.body;
+
+        
+        // ---- Intentar Iniciar Sesión ---
+        const result = await loginUser({
+            email,
+            password,
+            ipAddress: req.ip
+        });
+
+
+        // --- Comprobar Rol De Administrador ---
+        if (result.user.role !== "admin") {
+
+            // --- Revocar La Session Creada ---
+            await logoutUser(result.sessionId);
+
+            return res.redirect(303, "/admin/login?error=unauthorized");
+        }
+
+        // --- Configurar Cookie De Autenticación ---
+
+        res.cookie("accessToken", result.token, {
+
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 15 * 60 * 1000
+
+        });
+
+
+        // --- Configurar Cookie CSRF De La Sesión ---
+
+        res.cookie("csrfToken", result.csrfToken, {
+
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 15 * 60 * 1000
+
+        });
+
+
+        // --- Redirigir Al Dashboard ---
+
+        res.redirect(303, "/admin/dashboard");
+
+
+    } catch (error) {
+
+        return next(error);
+    
+    }
+};
+
+
+
+// =============================================
+// CERRAR SESIÓN DESDE EL PANEL ADMINISTRATIVO
+// =============================================
+
+const logout = async (req, res, next) => {
+
+    try {
+        
+        // --- Obtener ID De La Sesión ---
+
+        const sessionId = req.user.sessionId;
+
+
+        // --- Revocar Sesión ---
+
+        await logoutUser(sessionId);
+
+
+        // --- Eliminar Cookies ---
+
+        res.clearCookie("accessToken", {
+
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/"
+
+        });
+
+
+        res.clearCookie("csrfToken", {
+
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/"
+        
+        });
+
+
+        // --- Redirigir Al Login ---
+
+        return res.redirect(303, "/admin/login");
+
+    } catch (error) {
+
+        return next(error);
+    
+    }
+}
+
+
+
+// =============================================
+// ADMINISTRACIÓN DE CATEGORIAS
+// =============================================
 
 
 // ---------------------------------------------
@@ -281,6 +408,40 @@ const deleteCategoryView = async (req, res, next) => {
 
 
 
+
+// =============================================
+// ADMINISTRACIÓN DE PRODUCTOS
+// =============================================
+
+// ---------------------------------------------
+// LISTAR PRODUCTOS
+// ---------------------------------------------
+
+const showProducts = async (req, res, next) => {
+    try {
+        // Obtener todos los productos y sus categorías
+        const products = await Product.find()
+            .populate("category")
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Generar token CSRF
+        const csrfToken = generateCsrfToken(res);
+
+        // Renderizar listado de productos
+        return res.status(200).render("admin/products/list", {
+            title: "Administración de productos",
+            user: req.user,
+            csrfToken,
+            products
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 // ---------------------------------------------
 // MOSTRAR FORMULARIO DE EDICIÓN
 // ---------------------------------------------
@@ -344,125 +505,6 @@ const toggleCategoryStatus = async (req, res, next) => {
 
 
 
-// -----------------------------------------
-// INICIAR SESSION AL PANEL ADMINISTRATIVO
-// -----------------------------------------
-
-const login = async (req, res, next) => {
-
-    try {
-
-        // --- Obtener Email Y Contraseña ---
-        const { email, password } = req.body;
-
-        
-        // ---- Intentar Iniciar Sesión ---
-        const result = await loginUser({
-            email,
-            password,
-            ipAddress: req.ip
-        });
-
-
-        // --- Comprobar Rol De Administrador ---
-        if (result.user.role !== "admin") {
-
-            // --- Revocar La Session Creada ---
-            await logoutUser(result.sessionId);
-
-            return res.redirect(303, "/admin/login?error=unauthorized");
-        }
-
-        // --- Configurar Cookie De Autenticación ---
-
-        res.cookie("accessToken", result.token, {
-
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 15 * 60 * 1000
-
-        });
-
-
-        // --- Configurar Cookie CSRF De La Sesión ---
-
-        res.cookie("csrfToken", result.csrfToken, {
-
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 15 * 60 * 1000
-
-        });
-
-
-        // --- Redirigir Al Dashboard ---
-
-        res.redirect(303, "/admin/dashboard");
-
-
-    } catch (error) {
-
-        return next(error);
-    
-    }
-};
-
-
-
-// =============================================
-// CERRAR SESIÓN DESDE EL PANEL ADMINISTRATIVO
-// =============================================
-
-const logout = async (req, res, next) => {
-
-    try {
-        
-        // --- Obtener ID De La Sesión ---
-
-        const sessionId = req.user.sessionId;
-
-
-        // --- Revocar Sesión ---
-
-        await logoutUser(sessionId);
-
-
-        // --- Eliminar Cookies ---
-
-        res.clearCookie("accessToken", {
-
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/"
-
-        });
-
-
-        res.clearCookie("csrfToken", {
-
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/"
-        
-        });
-
-
-        // --- Redirigir Al Login ---
-
-        return res.redirect(303, "/admin/login");
-
-    } catch (error) {
-
-        return next(error);
-    
-    }
-}
 
 
 // --- Exportar Logica De Los Controlladores ---
