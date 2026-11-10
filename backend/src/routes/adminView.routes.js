@@ -113,6 +113,22 @@ router.post(
 );
 
 
+
+// ---------------------------------------------
+// ADMINISTRACIÓN DE PRODUCTOS
+// ---------------------------------------------
+
+
+// --- LISTAR PRODUCTOS ---
+router.get(
+    "/products",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    adminViewController.showProducts
+);
+
+
+
 // ---------------------------------------------
 // CERRAR SESIÓN
 // ---------------------------------------------
