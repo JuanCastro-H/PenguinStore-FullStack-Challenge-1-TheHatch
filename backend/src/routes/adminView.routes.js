@@ -77,6 +77,24 @@ router.post(
     adminViewController.createCategoryView
 );
 
+// Mostrar formulario de edición
+router.get(
+    "/categories/:id/edit",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    adminViewController.showEditCategory
+);
+
+// Guardar cambios
+router.post(
+    "/categories/:id/edit",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.updateCategoryView
+);
+
+
 // ---------------------------------------------
 // CERRAR SESIÓN
 // ---------------------------------------------
