@@ -52,6 +52,25 @@ router.get(
 
 
 // ---------------------------------------------
+// ADMINISTRACIÓN DE CATEGORÍAS
+// ---------------------------------------------
+
+router.get(
+    "/categories",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    adminViewController.showCategories
+);
+
+router.get(
+    "/categories/new",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    adminViewController.showCreateCategory
+);
+
+
+// ---------------------------------------------
 // CERRAR SESIÓN
 // ---------------------------------------------
 
