@@ -43,7 +43,7 @@ router.get("/:id", getCategoryById);
 // --- Crear Una Categoria ---
 router.post(
     "/",
-    authenticateToken,
+    authenticateToken(),
     authorizeRoles("admin"),
     verifyCsrfToken,
     createCategory
@@ -52,7 +52,7 @@ router.post(
 // --- Actualizar Una Categoria Por ID ---
 router.put(
     "/:id",
-    authenticateToken,
+    authenticateToken(),
     authorizeRoles("admin"),
     verifyCsrfToken,
     updateCategory
@@ -62,7 +62,7 @@ router.put(
 // --- Eliminar Una Categoria Por ID ---
 router.delete(
     "/:id",
-    authenticateToken,
+    authenticateToken(),
     authorizeRoles("admin"),
     verifyCsrfToken,
     deleteCategory
