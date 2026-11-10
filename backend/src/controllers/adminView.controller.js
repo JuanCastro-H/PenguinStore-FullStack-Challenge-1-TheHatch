@@ -497,21 +497,35 @@ const toggleCategoryStatus = async (req, res, next) => {
 
 const showProducts = async (req, res, next) => {
     try {
+
         // Obtener todos los productos y sus categorías
         const products = await Product.find()
             .populate("category")
             .sort({ createdAt: -1 })
             .lean();
 
+        
+        // --- MENSAJES DE RESPUESTA ---
+        const messages = {
+            deleted: "El producto fue eliminado correctamente.",
+            "status-updated": "El estado del producto fue actualizado.",
+            "not-found": "El producto solicitado no existe."
+        };
+
+
         // Generar token CSRF
         const csrfToken = generateCsrfToken(res);
 
+
         // Renderizar listado de productos
         return res.status(200).render("admin/products/list", {
+
             title: "Administración de productos",
             user: req.user,
             csrfToken,
-            products
+            products,
+            message: messages[req.query.message] || null
+
         });
 
     } catch (error) {
@@ -774,9 +788,12 @@ const updateProductView = async (req, res, next) => {
 
             // Conservar los datos enviados para corregir el formulario
             const formProduct = {
+
                 ...req.body,
+                _id: req.params.id,
                 category: req.body.category,
                 images: imagesToArray(req.body.images)
+            
             };
 
             const csrfToken = generateCsrfToken(res);
@@ -870,5 +887,9 @@ module.exports = {
     deleteCategoryView,
     showProducts,
     showCreateProduct,
-    createProductView
+    createProductView,
+    showEditProduct,
+    updateProductView,
+    toggleProductStatus,
+    deleteProductView
 };
