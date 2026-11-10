@@ -677,6 +677,115 @@ const showEditProduct = async (req, res, next) => {
 
 
 
+// ---------------------------------------------
+// ACTUALIZAR PRODUCTO
+// ---------------------------------------------
+
+const updateProductView = async (req, res, next) => {
+    try {
+        // Buscar producto
+        const product = await Product.findById(req.params.id);
+
+        if (!product) {
+            return res.status(404).send("Producto no encontrado.");
+        }
+
+        // Obtener datos del formulario
+        const {
+            name,
+            description,
+            price,
+            stock,
+            category,
+            images,
+            isActive
+        } = req.body;
+
+        // Verificar que la categoría exista
+        const selectedCategory = await Category.findById(category);
+
+        if (!selectedCategory) {
+            return res.status(400).send("La categoría seleccionada no existe.");
+        }
+
+        // No permitir asignar una categoría inactiva diferente
+        const isCurrentCategory = selectedCategory._id.equals(product.category);
+
+        if (!selectedCategory.isActive && !isCurrentCategory) {
+            return res.status(400).send("No puedes asignar una categoría inactiva.");
+        }
+
+        // Convertir imágenes en un array
+        const imageArray = images
+            ? images.split("\n")
+                .map(image => image.trim())
+                .filter(image => image.length > 0)
+            : [];
+
+        // Actualizar información del producto
+        product.name = name;
+        product.description = description;
+        product.price = price;
+        product.stock = stock;
+        product.category = category;
+        product.images = imageArray;
+        product.isActive = isActive === "true";
+
+        // Guardar cambios
+        await product.save();
+
+        // Redirigir al listado
+        return res.redirect(303, "/admin/products");
+
+    } catch (error) {
+        // Manejar identificadores inválidos
+        if (error.name === "CastError") {
+            return res.status(404).send("Producto no encontrado o categoría inválida.");
+        }
+
+        // Manejar errores de validación
+        if (error.name === "ValidationError") {
+            const product = await Product.findById(req.params.id).lean();
+
+            if (!product) {
+                return res.status(404).send("Producto no encontrado.");
+            }
+
+            const categories = await Category.find({
+                $or: [
+                    { isActive: true },
+                    { _id: product.category }
+                ]
+            })
+                .sort({ name: 1 })
+                .lean();
+
+            // Conservar los datos enviados para corregir el formulario
+            const formProduct = {
+                ...req.body,
+                category: req.body.category,
+                images: imagesToArray(req.body.images)
+            };
+
+            const csrfToken = generateCsrfToken(res);
+
+            return res.status(400).render("admin/products/form", {
+                title: "Editar producto",
+                user: req.user,
+                csrfToken,
+                categories,
+                product: formProduct,
+                error: "Verifica los datos ingresados. Algunos campos no son válidos."
+            });
+        }
+
+        next(error);
+    }
+};
+
+
+
+
 
 // --- Exportar Logica De Los Controlladores ---
 module.exports = {
