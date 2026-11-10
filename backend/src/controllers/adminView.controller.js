@@ -139,6 +139,60 @@ const showCreateCategory = (req, res) => {
 };
 
 
+
+// ---------------------------------------------
+// CREAR CATEGORÍA
+// ---------------------------------------------
+
+const createCategoryView = async (req, res, next) => {
+
+    try {
+
+        const { name, description } = req.body;
+
+        const category = await Category.create({
+
+            name,
+            description
+
+        });
+
+        return res.redirect(303, "/admin/categories");
+    
+    } catch (error) {
+
+        if (error.code === 11000) {
+
+            return res.status(409).render("admin/categories/form", {
+    
+                title: "Crear Categoría | Penguin Store",
+                user: req.user,
+                csrfToken: req.cookies.csrfToken,
+                category: req.body,
+                error: "Ya existe una categoría con ese nombre o slug."
+            
+            });
+
+        }
+
+        if (error.name ===  "ValidationError") {
+
+            return res.status(400).render("admin/categories/form", {
+
+                title: "Crear Categoría | Penguin Store",
+                user: req.user,
+                csrfToken: req.cookies.csrfToken,
+                category: req.body,
+                error: error.message
+            
+            });
+        }
+
+        next(error);
+    }
+};
+
+
 // -----------------------------------------
 // INICIAR SESSION AL PANEL ADMINISTRATIVO
 // -----------------------------------------
@@ -267,5 +321,6 @@ module.exports = {
     login,
     logout,
     showCategories,
-    showCreateCategory
+    showCreateCategory,
+    createCategoryView
 };
