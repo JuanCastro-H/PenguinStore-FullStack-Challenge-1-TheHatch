@@ -4,14 +4,14 @@ const router = express.Router();
 
 // --- Importar Controladores ---
 
-const adminViewController = require("../controllers/adminViw.controller");
+const adminViewController = require("../controllers/adminView.controller");
 
 
 // --- Importar Middlewares ---
 
 const { authenticateToken } = require("../middleware/auth.middleware");
 const { authorizeRoles } = require("../middleware/role.middleware");
-
+const { verifyLoginCsrfToken, verifyCsrfToken } = require("../middleware/csrf.middleware");
 
 
 // =============================================
@@ -29,16 +29,40 @@ router.get(
 );
 
 
-// ---------------------------------------------
-// DASHBOARD
+// --------------------------------------------
+// INICIAR SESSION
+// --------------------------------------------
+router.post(
+    "/login",
+    verifyLoginCsrfToken,
+    adminViewController.login
+);
+
+
+// --------------------------------------------
+// DASHBOARD / PANEL
 // ---------------------------------------------
 
 router.get(
     "/dashboard",
-    authenticateToken,
+    authenticateToken({ redirect: true }),
     authorizeRoles("admin"),
     adminViewController.showDashboard
 );
+
+
+// ---------------------------------------------
+// CERRAR SESIÓN
+// ---------------------------------------------
+
+router.post(
+    "/logout",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.logout
+);
+
 
 
 
