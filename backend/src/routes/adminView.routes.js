@@ -127,6 +127,13 @@ router.get(
     adminViewController.showProducts
 );
 
+// --- Mostrar Formulario Para Crear Nuevo Producto ---
+router.get(
+    "/products/new",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    adminViewController.showCreateProduct
+);
 
 
 // ---------------------------------------------
