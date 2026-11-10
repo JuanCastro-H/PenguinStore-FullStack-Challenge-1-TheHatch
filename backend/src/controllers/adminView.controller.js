@@ -73,6 +73,7 @@ const showDashboard = async (req, res, next) => {
 
             title: "Dashboard | Penguin Store",
             user: req.user,
+            csrfToken: req.cookies.csrfToken,
             products,
             categories
 
@@ -112,7 +113,7 @@ const login = async (req, res, next) => {
         if (result.user.role !== "admin") {
 
             // --- Revocar La Session Creada ---
-            await logoutUser(result.sessionID);
+            await logoutUser(result.sessionId);
 
             return res.redirect(303, "/admin/login?error=unauthorized");
         }
@@ -150,11 +151,62 @@ const login = async (req, res, next) => {
 
     } catch (error) {
 
-        return res.redirect(303, "/admin/login?error=credentials");
-
+        return next(error);
+    
     }
+};
 
 
+
+// =============================================
+// CERRAR SESIÓN DESDE EL PANEL ADMINISTRATIVO
+// =============================================
+
+const logout = async (req, res, next) => {
+
+    try {
+        
+        // --- Obtener ID De La Sesión ---
+
+        const sessionId = req.user.sessionId;
+
+
+        // --- Revocar Sesión ---
+
+        await logoutUser(sessionId);
+
+
+        // --- Eliminar Cookies ---
+
+        res.clearCookie("accessToken", {
+
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/"
+
+        });
+
+
+        res.clearCookie("csrfToken", {
+
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/"
+        
+        });
+
+
+        // --- Redirigir Al Login ---
+
+        return res.redirect(303, "/admin/login");
+
+    } catch (error) {
+
+        return next(error);
+    
+    }
 }
 
 
@@ -162,5 +214,6 @@ const login = async (req, res, next) => {
 module.exports = {
     showLogin,
     showDashboard,
-    login
+    login,
+    logout
 };
