@@ -626,6 +626,58 @@ const createProductView = async (req, res, next) => {
 
 
 
+// ---------------------------------------------
+// MOSTRAR FORMULARIO DE EDICIÓN
+// ---------------------------------------------
+
+const showEditProduct = async (req, res, next) => {
+    try {
+        // Buscar producto
+        const product = await Product.findById(req.params.id).lean();
+
+        if (!product) {
+            return res.status(404).send("Producto no encontrado.");
+        }
+
+        // Obtener categorías activas y conservar la categoría actual
+        const categories = await Category.find({
+            $or: [
+                { isActive: true },
+                { _id: product.category }
+            ]
+        })
+            .sort({ name: 1 })
+            .lean();
+
+        // Normalizar referencias para compararlas en Pug
+        product.category = product.category.toString();
+
+        // Generar token CSRF
+        const csrfToken = generateCsrfToken(res);
+
+        // Renderizar formulario
+        return res.status(200).render("admin/products/form", {
+            title: "Editar producto",
+            user: req.user,
+            csrfToken,
+            categories,
+            product,
+            error: null
+        });
+
+    } catch (error) {
+        if (error.name === "CastError") {
+            return res.status(404).send("Producto no encontrado.");
+        }
+
+        next(error);
+    }
+};
+
+
+
+
+
 // --- Exportar Logica De Los Controlladores ---
 module.exports = {
     showLogin,
@@ -639,5 +691,7 @@ module.exports = {
     updateCategoryView,
     toggleCategoryStatus,
     deleteCategoryView,
-    showProducts
+    showProducts,
+    showCreateProduct,
+    createProductView
 };
