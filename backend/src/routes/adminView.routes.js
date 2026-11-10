@@ -94,6 +94,14 @@ router.post(
     adminViewController.updateCategoryView
 );
 
+router.post(
+    "/categories/:id/toggle-status",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.toggleCategoryStatus
+);
+
 
 // ---------------------------------------------
 // CERRAR SESIÓN
