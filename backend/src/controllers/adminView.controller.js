@@ -829,6 +829,30 @@ const toggleProductStatus = async (req, res, next) => {
 
 
 
+// ---------------------------------------------
+// ELIMINAR PRODUCTO
+// ---------------------------------------------
+
+const deleteProductView = async (req, res, next) => {
+    try {
+        // Buscar y eliminar producto
+        const product = await Product.findByIdAndDelete(req.params.id);
+
+        if (!product) {
+            return res.redirect(303, "/admin/products?message=not-found");
+        }
+
+        return res.redirect(303, "/admin/products?message=deleted");
+
+    } catch (error) {
+        if (error.name === "CastError") {
+            return res.redirect(303, "/admin/products?message=not-found");
+        }
+
+        next(error);
+    }
+};
+
 
 
 // --- Exportar Logica De Los Controlladores ---
