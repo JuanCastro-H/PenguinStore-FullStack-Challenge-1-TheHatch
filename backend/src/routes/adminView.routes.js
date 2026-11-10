@@ -144,10 +144,8 @@ router.post(
     adminViewController.createProductView
 );
 
-// ---------------------------------------------
-// CERRAR SESIÓN
-// ---------------------------------------------
 
+// --- Cerrar Sesión ---
 router.post(
     "/logout",
     authenticateToken({ redirect: true }),
@@ -156,7 +154,13 @@ router.post(
     adminViewController.logout
 );
 
-
+// --- Mostrar Formulario De Edición ---
+router.get(
+    "/products/:id/edit",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    adminViewController.showEditProduct
+);
 
 
 // --- EXPORTAR ROUTERS ---
