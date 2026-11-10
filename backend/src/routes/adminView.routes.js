@@ -135,6 +135,14 @@ router.get(
     adminViewController.showCreateProduct
 );
 
+// --- Crear Nuevo Producto ---
+router.post(
+    "/products",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.createProductView
+);
 
 // ---------------------------------------------
 // CERRAR SESIÓN
