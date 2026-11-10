@@ -7,6 +7,18 @@ const { generateCsrfToken } = require("../services/csrf.service");
 const { loginUser, logoutUser } = require("../services/auth.service");
 
 
+// ---------------------------------------------
+// CONVERTIR IMÁGENES EN ARRAY
+// ---------------------------------------------
+
+const imagesToArray = (images) => {
+    if (!images) return [];
+
+    return Array.isArray(images)
+        ? images
+        : images.split("\n").map(image => image.trim()).filter(Boolean);
+};
+
 // ====================================
 // CONTROLADOR DE ACCIONES 
 // ====================================
