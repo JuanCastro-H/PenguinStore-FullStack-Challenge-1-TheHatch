@@ -180,6 +180,14 @@ router.post(
     adminViewController.toggleProductStatus
 );
 
+// --- Eliminar Producto ---
+router.post(
+    "/products/:id/delete",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.deleteProductView
+);
 
 // --- EXPORTAR ROUTERS ---
 module.exports = router;
