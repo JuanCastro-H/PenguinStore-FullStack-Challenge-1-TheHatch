@@ -69,6 +69,13 @@ router.get(
     adminViewController.showCreateCategory
 );
 
+router.post(
+    "/categories",
+    authenticateToken({ redirect: true }),
+    authorizeRoles("admin"),
+    verifyCsrfToken,
+    adminViewController.createCategoryView
+);
 
 // ---------------------------------------------
 // CERRAR SESIÓN
