@@ -89,6 +89,56 @@ const showDashboard = async (req, res, next) => {
 
 
 
+// ---------------------------------------------
+// LISTAR CATEGORÍAS
+// ---------------------------------------------
+
+const showCategories = async (req, res, next) => {
+
+    try {
+
+        const categories = await Category.find()
+            .sort({ name: 1 })
+            .lean();
+
+
+        res.render("admin/categories/list", {
+
+            title: "Administrar Categorías | Penguin Store",
+            user: req.user,
+            csrfToken: req.cookies.csrfToken,
+            categories
+
+        });
+    
+    } catch (error) {
+
+        next(error);
+    
+    }
+    
+};
+
+
+
+// ---------------------------------------------
+// MOSTRAR FORMULARIO DE CREACIÓN DE CATEGORIAS
+// ---------------------------------------------
+
+const showCreateCategory = (req, res) => {
+
+    res.render("admin/categories/form", {
+
+        title: "Crear Categoría | Penguin Store",
+        user: req.user,
+        csrfToken: req.cookies.csrfToken,
+        category: null,
+        error: null
+    
+    });
+};
+
+
 // -----------------------------------------
 // INICIAR SESSION AL PANEL ADMINISTRATIVO
 // -----------------------------------------
@@ -215,5 +265,7 @@ module.exports = {
     showLogin,
     showDashboard,
     login,
-    logout
+    logout,
+    showCategories,
+    showCreateCategory
 };
