@@ -265,6 +265,35 @@ const showEditCategory =  async (req, res, next) => {
 
 
 
+// ---------------------------------------------
+// CAMBIAR ESTADO DE CATEGORÍA
+// ---------------------------------------------
+
+const toggleCategoryStatus = async (req, res, next) => {
+
+    try {
+
+        const category = await Category.findById(req.params.id);
+
+        if (!category) {
+            return res.status(404).send("Cartegoría no encontrada");
+        }
+
+        category.isActive = !category.isActive;
+
+        await category.save();
+
+        return res.redirect(303, "/admin/categories");
+    
+    } catch (error) {
+
+        next(error);
+    
+    }
+};
+
+
+
 // -----------------------------------------
 // INICIAR SESSION AL PANEL ADMINISTRATIVO
 // -----------------------------------------
