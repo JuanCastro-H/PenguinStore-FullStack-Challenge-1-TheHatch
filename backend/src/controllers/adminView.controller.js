@@ -3,9 +3,9 @@
 const Category = require("../models/Category");
 const Product = require("../models/Product");
 
-const { generateCsrfToken } = require("../services/csrf.service");
-const { loginUser, logoutUser } = require("../services/auth.service");
 
+const { loginUser, logoutUser } = require("../services/auth.service");
+const { generateCsrfToken } = require("../services/csrf.service");
 
 // ---------------------------------------------
 // CONVERTIR IMÁGENES EN ARRAY
@@ -513,16 +513,12 @@ const showProducts = async (req, res, next) => {
         };
 
 
-        // Generar token CSRF
-        const csrfToken = generateCsrfToken(res);
-
-
         // Renderizar listado de productos
         return res.status(200).render("admin/products/list", {
 
             title: "Administración de productos",
             user: req.user,
-            csrfToken,
+            csrfToken: req.cookies.csrfToken,
             products,
             message: messages[req.query.message] || null
 
@@ -546,8 +542,8 @@ const showCreateProduct = async (req, res, next) => {
             .sort({ name: 1 })
             .lean();
 
-        // Generar token CSRF
-        const csrfToken = generateCsrfToken(res);
+        // --- Obtener token CSRF de la sesión actual ---
+        const csrfToken = req.cookies.csrfToken;
 
         // Renderizar formulario
         return res.status(200).render("admin/products/form", {
@@ -571,7 +567,9 @@ const showCreateProduct = async (req, res, next) => {
 // ---------------------------------------------
 
 const createProductView = async (req, res, next) => {
+
     try {
+
         // Obtener datos del formulario
         const {
             name,
@@ -600,7 +598,8 @@ const createProductView = async (req, res, next) => {
                 .sort({ name: 1 })
                 .lean();
 
-            const csrfToken = generateCsrfToken(res);
+            // ---  Obtener token CSRF de la sesión actual ---
+            const csrfToken = req.cookies.csrfToken;
 
             return res.status(400).render("admin/products/form", {
                 title: "Crear producto",
@@ -633,7 +632,8 @@ const createProductView = async (req, res, next) => {
                 .sort({ name: 1 })
                 .lean();
 
-            const csrfToken = generateCsrfToken(res);
+            // --- Obtener token CSRF de la sesión actual ---
+            const csrfToken = req.cookies.csrfToken;
 
             return res.status(400).render("admin/products/form", {
                 title: "Crear producto",
@@ -678,8 +678,8 @@ const showEditProduct = async (req, res, next) => {
         // Normalizar referencias para compararlas en Pug
         product.category = product.category.toString();
 
-        // Generar token CSRF
-        const csrfToken = generateCsrfToken(res);
+        // --- Obtener token CSRF de la sesión actual ---
+        const csrfToken = req.cookies.csrfToken;
 
         // Renderizar formulario
         return res.status(200).render("admin/products/form", {
@@ -796,7 +796,8 @@ const updateProductView = async (req, res, next) => {
             
             };
 
-            const csrfToken = generateCsrfToken(res);
+            // --- Obtener token CSRF de la sesión actual ---
+            const csrfToken = req.cookies.csrfToken;
 
             return res.status(400).render("admin/products/form", {
                 title: "Editar producto",
