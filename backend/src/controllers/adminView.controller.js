@@ -101,13 +101,21 @@ const showCategories = async (req, res, next) => {
             .sort({ name: 1 })
             .lean();
 
+        // --- Mensajes De Eliminación De Categoria ---
+        const messages = {
+            deleted: "La categoría fue eliminada correctamente.",
+            "has-products": "No puedes eliminar una categoría que tiene productos asociados.",
+            "not-found": "La categoría solicitada no existe."
+        };
+
 
         res.render("admin/categories/list", {
 
             title: "Administrar Categorías | Penguin Store",
             user: req.user,
             csrfToken: req.cookies.csrfToken,
-            categories
+            categories,
+            message: messages[req.query.message] || null
 
         });
     
@@ -468,5 +476,6 @@ module.exports = {
     createCategoryView,
     showEditCategory,
     updateCategoryView,
-    toggleCategoryStatus
+    toggleCategoryStatus,
+    deleteCategoryView
 };
