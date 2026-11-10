@@ -1,0 +1,27 @@
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        title= title
+        link(rel="stylesheet" href="/css/output.css")
+
+    body
+        main.container.mx-auto.p-8
+            h1.text-3xl.font-bold.mb-6 ¡Bienvenido al panel administrativo!
+
+            p.mb-4
+                | Hola, #{user.email}
+
+            section(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+                article.p-6.rounded-lg.shadow
+                    h2.text-xl.font-bold Productos
+                    p.text-3xl= products
+
+                article.p-6.rounded-lg.shadow
+                    h2.text-xl.font-bold Categorías
+                    p.text-3xl= categories
+
+            form(action="/admin/logout" method="POST")
+                input(type="hidden" name="_csrf" value=csrfToken)
+                button(type="submit") Cerrar sesión
