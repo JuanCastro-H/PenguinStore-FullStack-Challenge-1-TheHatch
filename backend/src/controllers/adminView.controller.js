@@ -193,6 +193,41 @@ const createCategoryView = async (req, res, next) => {
 };
 
 
+
+// ---------------------------------------------
+// MOSTRAR FORMULARIO DE EDICIÓN
+// ---------------------------------------------
+
+const showEditCategory =  async (req, res, next) => {
+
+    try {
+
+        const category = await Category.findById(req.params.id).lean();
+
+        if (!category) {
+            return res.status(404).send("Categoría no encontrada");
+        }
+
+        res.render("admin/categories/form", {
+
+            title: "Editar Categoría | Penguin Store",
+            user: req.user,
+            csrfToken: req.cookies.csrfToken,
+            category,
+            error: null
+        
+        });
+    
+    } catch (error) {
+
+        next(error);
+    
+    }
+
+};
+
+
+
 // -----------------------------------------
 // INICIAR SESSION AL PANEL ADMINISTRATIVO
 // -----------------------------------------
