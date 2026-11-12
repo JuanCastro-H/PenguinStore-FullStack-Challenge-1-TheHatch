@@ -1,0 +1,83 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title= title
+        link(rel="stylesheet", href="/css/styles.css")
+
+    body.bg-slate-950.text-white.min-h-screen
+        main.max-w-3xl.mx-auto.p-6
+            h1.text-3xl.font-bold.text-green-400.mb-6 Finalizar compra
+
+            form.bg-white.text-gray-900.rounded-xl.p-6.shadow-lg(
+                action="/store/orders"
+                method="POST"
+            )
+                input(type="hidden", name="_csrf", value=csrfToken)
+
+                h2.text-xl.font-bold.mb-4 Tus productos
+
+                if products.length === 0
+                    p No hay productos disponibles.
+                else
+                    each product, i in products
+                        .border-b.py-4
+                            h3.font-bold= product.name
+                            p.text-gray-600
+                                | G. #{product.price.toLocaleString("es-PY")}
+
+                            p.text-sm.text-gray-500
+                                | Stock: #{product.stock}
+
+                            input(
+                                type="hidden"
+                                name=`items[${i}][productId]`
+                                value=product._id
+                            )
+
+                            label.block.mt-2(for=`quantity-${i}`) Cantidad
+
+                            input.w-full.border.rounded-lg.p-2(
+                                id=`quantity-${i}`
+                                type="number"
+                                name=`items[${i}][quantity]`
+                                min="0"
+                                max=product.stock
+                                value="0"
+                                required
+                            )
+
+                h2.text-xl.font-bold.mt-6.mb-4 Datos del cliente
+
+                label.block.mb-2(for="customer-name") Nombre completo
+                input#customer-name.w-full.border.rounded-lg.p-2.mb-4(
+                    type="text"
+                    name="customer[name]"
+                    required
+                    maxlength="100"
+                )
+
+                label.block.mb-2(for="customer-email") Correo electrónico
+                input#customer-email.w-full.border.rounded-lg.p-2.mb-4(
+                    type="email"
+                    name="customer[email]"
+                    required
+                )
+
+                label.block.mb-2(for="customer-address") Dirección de tu iglú
+                textarea#customer-address.w-full.border.rounded-lg.p-2.mb-6(
+                    name="customer[address]"
+                    rows="3"
+                    required
+                    maxlength="300"
+                )
+
+                if products.length > 0
+                    button(
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg"
+                        type="submit"
+                    ) Confirmar pedido
+
+            a.inline-block.text-green-400.mt-6(href="/store") Volver a la tienda
