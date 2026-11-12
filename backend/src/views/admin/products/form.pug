@@ -1,175 +1,200 @@
-
 doctype html
 html(lang="es")
     head
         meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title= title
-        link(rel="stylesheet" href="/css/output.css")
+        link(rel="stylesheet" href="/css/styles.css")
 
-    body
-        main.container.mx-auto.p-8
+    body(class="bg-slate-950 text-white min-h-screen flex flex-col")
 
-            // =============================================
-            // ENCABEZADO
-            // =============================================
+        //- =============================================
+        //- ENCABEZADO
+        //- =============================================
 
-            h1.text-3xl.font-bold.mb-6= title
+        header(class="bg-slate-900 border-b border-slate-800 p-6 text-center")
+
+            p(class="text-2xl font-bold text-green-400")
+                | Penguin Store 🐧
+
+            p(class="text-gray-400 text-sm mt-1")
+                | Panel de administración
+
+        //- =============================================
+        //- CONTENIDO PRINCIPAL
+        //- =============================================
+
+        main(class="flex-1 w-full max-w-2xl mx-auto px-6 py-10")
 
             a(
                 href="/admin/products"
-                class="text-blue-600 underline"
-            ) Volver al listado
+                class="inline-flex items-center gap-2 text-green-400 hover:text-green-300 font-semibold rounded-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-green-400 transition-colors"
+            ) ← Volver al listado
 
-            // =============================================
-            // MENSAJES DE ERROR
-            // =============================================
+            h1(class="text-3xl font-bold mt-6 mb-8")= title
+
+            //- =============================================
+            //- MENSAJES DE ERROR
+            //- =============================================
 
             if error
-                p(class="p-3 bg-red-100 text-red-700 rounded my-4")= error
+                div(class="bg-red-900/60 border border-red-600 text-red-100 rounded-xl p-4 mb-6")
+                    p= error
 
-            // =============================================
-            // FORMULARIO DE PRODUCTO
-            // =============================================
+            //- =============================================
+            //- FORMULARIO DE PRODUCTO
+            //- =============================================
 
-            form(
-                action=product ? `/admin/products/${product._id}/edit` : "/admin/products"
-                method="POST"
-                class="max-w-2xl mt-6 space-y-4"
-            )
+            div(class="bg-white text-gray-900 rounded-2xl shadow-lg p-8")
 
-                input(type="hidden" name="_csrf" value=csrfToken)
+                form(
+                    action=product ? `/admin/products/${product._id}/edit` : "/admin/products"
+                    method="POST"
+                    class="space-y-6"
+                )
 
-                // ---------------------------------------------
-                // NOMBRE
-                // ---------------------------------------------
+                    input(type="hidden" name="_csrf" value=csrfToken)
 
-                div
-                    label(for="name" class="block font-bold mb-1") Nombre
-                    input(
-                        type="text"
-                        id="name"
-                        name="name"
-                        value=product ? product.name : ""
-                        required
-                        maxlength="150"
-                        class="w-full border rounded p-2"
-                    )
+                    //- ---------------------------------------------
+                    //- NOMBRE
+                    //- ---------------------------------------------
 
-                // ---------------------------------------------
-                // DESCRIPCIÓN
-                // ---------------------------------------------
+                    div
+                        label(for="name" class="block text-sm font-semibold text-gray-700") Nombre
+                        input(
+                            type="text"
+                            id="name"
+                            name="name"
+                            value=product ? product.name : ""
+                            required
+                            maxlength="150"
+                            class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-hidden focus:border-green-600 focus:ring-2 focus:ring-green-200"
+                        )
 
-                div
-                    label(for="description" class="block font-bold mb-1") Descripción
-                    textarea(
-                        id="description"
-                        name="description"
-                        required
-                        maxlength="650"
-                        rows="4"
-                        class="w-full border rounded p-2"
-                    )= product ? product.description : ""
+                    //- ---------------------------------------------
+                    //- DESCRIPCIÓN
+                    //- ---------------------------------------------
 
-                // ---------------------------------------------
-                // PRECIO
-                // ---------------------------------------------
+                    div
+                        label(for="description" class="block text-sm font-semibold text-gray-700") Descripción
+                        textarea(
+                            id="description"
+                            name="description"
+                            required
+                            maxlength="650"
+                            rows="4"
+                            class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-hidden focus:border-green-600 focus:ring-2 focus:ring-green-200"
+                        )= product ? product.description : ""
 
-                div
-                    label(for="price" class="block font-bold mb-1") Precio
-                    input(
-                        type="number"
-                        id="price"
-                        name="price"
-                        value=product ? product.price : ""
-                        min="0"
-                        step="1"
-                        required
-                        class="w-full border rounded p-2"
-                    )
+                    //- ---------------------------------------------
+                    //- PRECIO Y STOCK
+                    //- ---------------------------------------------
 
-                // ---------------------------------------------
-                // STOCK
-                // ---------------------------------------------
+                    div(class="grid grid-cols-1 sm:grid-cols-2 gap-6")
 
-                div
-                    label(for="stock" class="block font-bold mb-1") Stock
-                    input(
-                        type="number"
-                        id="stock"
-                        name="stock"
-                        value=product ? product.stock : "0"
-                        min="0"
-                        step="1"
-                        required
-                        class="w-full border rounded p-2"
-                    )
+                        div
+                            label(for="price" class="block text-sm font-semibold text-gray-700") Precio
+                            input(
+                                type="number"
+                                id="price"
+                                name="price"
+                                value=product ? product.price : ""
+                                min="0"
+                                step="1"
+                                required
+                                class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-hidden focus:border-green-600 focus:ring-2 focus:ring-green-200"
+                            )
 
-                // ---------------------------------------------
-                // CATEGORÍA
-                // ---------------------------------------------
+                        div
+                            label(for="stock" class="block text-sm font-semibold text-gray-700") Stock
+                            input(
+                                type="number"
+                                id="stock"
+                                name="stock"
+                                value=product ? product.stock : "0"
+                                min="0"
+                                step="1"
+                                required
+                                class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-hidden focus:border-green-600 focus:ring-2 focus:ring-green-200"
+                            )
 
-                div
-                    label(for="category" class="block font-bold mb-1") Categoría
+                    //- ---------------------------------------------
+                    //- CATEGORÍA Y ESTADO
+                    //- ---------------------------------------------
 
-                    select(
-                        id="category"
-                        name="category"
-                        required
-                        class="w-full border rounded p-2"
-                    )
-                        option(value="") Selecciona una categoría
+                    div(class="grid grid-cols-1 sm:grid-cols-2 gap-6")
 
-                        each category in categories
-                            option(
-                                value=category._id
-                                selected=product && product.category.toString() === category._id.toString()
-                            )= category.name
+                        div
+                            label(for="category" class="block text-sm font-semibold text-gray-700") Categoría
 
-                // ---------------------------------------------
-                // IMÁGENES
-                // ---------------------------------------------
+                            select(
+                                id="category"
+                                name="category"
+                                required
+                                class="w-full mt-2 p-3 border border-gray-300 rounded-lg bg-white focus:outline-hidden focus:border-green-600 focus:ring-2 focus:ring-green-200"
+                            )
+                                option(value="") Selecciona una categoría
 
-                div
-                    label(for="images" class="block font-bold mb-1") URLs de imágenes
+                                each category in categories
+                                    option(
+                                        value=category._id
+                                        selected=product && product.category.toString() === category._id.toString()
+                                    )= category.name
 
-                    textarea(
-                        id="images"
-                        name="images"
-                        rows="4"
-                        placeholder="Una URL por línea"
-                        class="w-full border rounded p-2"
-                    )= product && product.images ? (Array.isArray(product.images) ? product.images.join("\n") : product.images) : ""
+                        div
+                            label(for="isActive" class="block text-sm font-semibold text-gray-700") Estado
 
-                    p.text-sm.text-gray-500 Una URL por línea. Campo opcional.
+                            select(
+                                id="isActive"
+                                name="isActive"
+                                class="w-full mt-2 p-3 border border-gray-300 rounded-lg bg-white focus:outline-hidden focus:border-green-600 focus:ring-2 focus:ring-green-200"
+                            )
+                                option(
+                                    value="true"
+                                    selected=!product || product.isActive === true || product.isActive === "true"
+                                ) Activo
 
-                // ---------------------------------------------
-                // ESTADO
-                // ---------------------------------------------
+                                option(
+                                    value="false"
+                                    selected=product && (product.isActive === false || product.isActive === "false")
+                                ) Inactivo
 
-                div
-                    label(for="isActive" class="block font-bold mb-1") Estado
+                    //- ---------------------------------------------
+                    //- IMÁGENES
+                    //- ---------------------------------------------
 
-                    select(
-                        id="isActive"
-                        name="isActive"
-                        class="w-full border rounded p-2"
-                    )
-                        option(
-                            value="true"
-                            selected=!product || product.isActive === true || product.isActive === "true"
-                        ) Activo
+                    div
+                        label(for="images" class="block text-sm font-semibold text-gray-700") URLs de imágenes
 
-                        option(
-                            value="false"
-                            selected=product && (product.isActive === false || product.isActive === "false")
-                        ) Inactivo
+                        textarea(
+                            id="images"
+                            name="images"
+                            rows="4"
+                            placeholder="Una URL por línea"
+                            class="w-full mt-2 p-3 border border-gray-300 rounded-lg focus:outline-hidden focus:border-green-600 focus:ring-2 focus:ring-green-200"
+                        )= product && product.images ? (Array.isArray(product.images) ? product.images.join("\n") : product.images) : ""
 
-                // ---------------------------------------------
-                // ENVIAR FORMULARIO
-                // ---------------------------------------------
+                        p(class="text-sm text-gray-500 mt-2") Una URL por línea. Campo opcional.
 
-                button(
-                    type="submit"
-                    class="bg-blue-600 text-white px-4 py-2 rounded"
-                )= product ? "Guardar cambios" : "Crear producto"
+                    //- ---------------------------------------------
+                    //- ENVIAR FORMULARIO
+                    //- ---------------------------------------------
+
+                    div(class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end pt-2")
+
+                        a(
+                            href="/admin/products"
+                            class="text-center border border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold py-3 px-6 rounded-lg transition-colors"
+                        ) Cancelar
+
+                        button(
+                            type="submit"
+                            class="bg-green-600 hover:bg-green-700 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-green-300 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                        )= product ? "Guardar cambios" : "Crear producto"
+
+        //- =============================================
+        //- PIE DE PÁGINA
+        //- =============================================
+
+        footer(class="border-t border-slate-900 text-center text-gray-500 text-sm p-6")
+            | Penguin Store 🐧 — Administración
