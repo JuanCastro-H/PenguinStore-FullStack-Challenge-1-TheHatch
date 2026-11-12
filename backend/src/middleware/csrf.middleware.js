@@ -171,7 +171,7 @@ const verifyLoginCsrfToken = (req, res, next) => {
 
 
 
-// ---------------------------------------------
+/*/ ---------------------------------------------
 // GENERAR CSRF PARA LA TIENDA PÚBLICA
 // ---------------------------------------------
 
@@ -245,6 +245,7 @@ const verifyPublicCsrfToken = (req, res, next) => {
     next();
 };
 
+*/
 
 
 // =============================================
@@ -254,6 +255,6 @@ const verifyPublicCsrfToken = (req, res, next) => {
 module.exports = {
     verifyCsrfToken,
     verifyLoginCsrfToken,
-    providePublicCsrfToken,
-    verifyPublicCsrfToken
+    // providePublicCsrfToken,
+    // verifyPublicCsrfToken
 };

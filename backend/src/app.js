@@ -61,7 +61,7 @@ app.use(cookieParser());
 // ARCHIVOS ESTÁTICOS
 // =============================================
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "/public")));
 
 
 
@@ -87,12 +87,6 @@ app.get("/test-view", (req, res) => {
 // --- Autenticación ---
 
 app.use("/auth", require("./routes/auth.routes"));
-
-
-// --- Tienda Pública ---
-
-app.use("/store", require("./routes/store.routes"));
-
 
 // --- Categorías ---
 
