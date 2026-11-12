@@ -1,0 +1,25 @@
+
+doctype html
+html(lang="es")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title= title
+        link(rel="stylesheet", href="/css/styles.css")
+
+    body.bg-slate-950.text-white.min-h-screen.flex.items-center.justify-center
+        main.bg-white.text-gray-900.rounded-2xl.shadow-xl.p-10.text-center.max-w-lg.mx-4
+            h1.text-3xl.font-bold.text-green-700.mb-4 ¡Pedido recibido!
+
+            p.text-gray-600.mb-4
+                | Tu pedido fue registrado correctamente.
+
+            p.font-bold.text-sm.text-gray-500
+                | Número de pedido:
+
+            p.text-green-700.font-mono.break-all.mt-2= orderId
+
+            a(
+                class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg mt-6"
+                href="/store"
+            ) Volver a la tienda
