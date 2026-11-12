@@ -1,44 +1,77 @@
-
 doctype html
 html(lang="es")
     head
         meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title= title
-        link(rel="stylesheet" href="/css/output.css")
+        link(rel="stylesheet" href="/css/styles.css")
 
-    body
-        main.container.mx-auto.p-8
-            h1.text-3xl.font-bold.mb-6 Administración de categorías
+    body(class="bg-slate-950 text-white min-h-screen flex flex-col")
 
-            // --- Mensajes De Respuesta ---
-            if message
-                p(class="p-3 rounded border mb-4")= message
+        //- =============================================
+        //- ENCABEZADO
+        //- =============================================
 
-            // --- Información Del Administrador ---
-            p.mb-4
-                | Hola, #{user.email}
+        header(class="bg-slate-900 border-b border-slate-800")
 
-            // --- Navegación ---
+            div(class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
+
+                div(class="text-center sm:text-left")
+                    p(class="text-2xl font-bold text-green-400")
+                        | Penguin Store 🐧
+
+                    p(class="text-gray-400 text-sm mt-1")
+                        | Panel de administración
+
+                div(class="flex items-center justify-center gap-3 bg-slate-800 border border-slate-700 rounded-full pl-2 pr-5 py-2 self-center sm:self-auto")
+
+                    span(class="flex items-center justify-center w-9 h-9 rounded-full bg-green-600 text-white")
+                        | 👤
+
+                    span(class="text-sm text-gray-200 break-all")
+                        | #{user.email}
+
+        //- =============================================
+        //- CONTENIDO PRINCIPAL
+        //- =============================================
+
+        main(class="flex-1 w-full max-w-6xl mx-auto px-6 py-10")
+
+            //- --- Navegación ---
             a(
                 href="/admin/dashboard"
-                class="text-blue-600 underline"
-            ) Volver al dashboard
+                class="inline-flex items-center gap-2 text-green-400 hover:text-green-300 font-semibold rounded-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-green-400 transition-colors"
+            ) ← Volver al dashboard
 
-            // --- Crear Nueva Categoría ---
-            section.my-6
+            //- --- Título y acción principal ---
+            div(class="mt-6 mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
+
+                h1(class="text-3xl font-bold")
+                    | Administración de categorías
+
                 a(
                     href="/admin/categories/new"
-                    class="inline-block bg-blue-600 text-white px-4 py-2 rounded"
+                    class="inline-block text-center bg-green-600 hover:bg-green-700 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-green-300 text-white font-bold py-3 px-6 rounded-lg transition-colors"
                 ) Crear categoría
 
-            // =============================================
-            // LISTADO DE CATEGORÍAS
-            // =============================================
+            //- --- Mensajes De Respuesta ---
+            if message
+                div(class="bg-sky-900/60 border border-sky-600 text-sky-100 rounded-xl p-4 mb-8")
+                    p= message
+
+            //- =============================================
+            //- LISTADO DE CATEGORÍAS
+            //- =============================================
 
             if categories.length === 0
 
-                p No hay categorías registradas.
+                div(class="bg-slate-900 border border-dashed border-slate-700 rounded-2xl p-12 text-center")
+
+                    p(class="text-5xl mb-4")
+                        | 🗂️
+
+                    p(class="text-xl font-bold")
+                        | No hay categorías registradas.
 
             else
 
@@ -46,50 +79,71 @@ html(lang="es")
 
                     each category in categories
 
-                        article(class="p-6 rounded-lg shadow border")
+                        article(class="bg-white text-gray-900 rounded-2xl shadow-lg overflow-hidden flex flex-col border-t-4 " + (category.isActive ? "border-green-600" : "border-gray-400"))
 
-                            // --- Información De La Categoría ---
-                            h2.text-xl.font-bold= category.name
+                            div(class="p-6 flex-1")
 
-                            p.my-2= category.description || "Sin descripción"
+                                //- --- Información De La Categoría ---
+                                div(class="flex items-start justify-between gap-3")
 
-                            p
-                                strong Estado:
-                                |  #{category.isActive ? "Activa" : "Inactiva"}
+                                    h2(class="text-xl font-bold break-words")= category.name
 
-                            p.text-sm.text-gray-500.mt-2
-                                | Slug: #{category.slug}
+                                    if category.isActive
+                                        span(class="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-3 py-1 text-xs font-bold shrink-0")
+                                            span(class="w-2 h-2 rounded-full bg-green-600")
+                                            | Activa
 
-                            // --- Editar Categoría ---
-                            a(
-                                href=`/admin/categories/${category._id}/edit`
-                                class="text-blue-600 underline"
-                            ) Editar
+                                    else
+                                        span(class="inline-flex items-center gap-2 bg-gray-200 text-gray-700 rounded-full px-3 py-1 text-xs font-bold shrink-0")
+                                            span(class="w-2 h-2 rounded-full bg-gray-500")
+                                            | Inactiva
 
-                            // --- Activar / Desactivar Categoría ---
-                            form(
-                                action=`/admin/categories/${category._id}/toggle-status`
-                                method="POST"
-                                class="mt-3"
-                            )
-                                input(type="hidden" name="_csrf" value=csrfToken)
+                                p(class="text-gray-600 mt-3")= category.description || "Sin descripción"
 
-                                button(
-                                    type="submit"
-                                    class=category.isActive
-                                        ? "bg-red-600 text-white px-3 py-2 rounded"
-                                        : "bg-green-600 text-white px-3 py-2 rounded"
-                                )= category.isActive ? "Desactivar" : "Activar"
+                                p(class="text-sm text-gray-500 mt-4")
+                                    | Slug: 
+                                    span(class="font-mono bg-gray-100 rounded px-2 py-1 break-all")
+                                        | #{category.slug}
 
-                            // --- Eliminar Categoría ---
-                            form(
-                                action=`/admin/categories/${category._id}/delete`
-                                method="POST"
-                                class="mt-3"
-                            )
-                                input(type="hidden" name="_csrf" value=csrfToken)
+                            //- --- Acciones ---
+                            div(class="bg-gray-50 border-t border-gray-200 p-4 flex flex-wrap items-center gap-3")
 
-                                button(
-                                    type="submit"
-                                    class="bg-red-700 text-white px-3 py-2 rounded"
-                                ) Eliminar
+                                //- --- Editar Categoría ---
+                                a(
+                                    href=`/admin/categories/${category._id}/edit`
+                                    class="border border-green-600 text-green-700 hover:bg-green-600 hover:text-white font-semibold px-4 py-2 rounded-lg transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-green-300"
+                                ) Editar
+
+                                //- --- Activar / Desactivar Categoría ---
+                                form(
+                                    action=`/admin/categories/${category._id}/toggle-status`
+                                    method="POST"
+                                )
+                                    input(type="hidden" name="_csrf" value=csrfToken)
+
+                                    button(
+                                        type="submit"
+                                        class=category.isActive
+                                            ? "bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold px-4 py-2 rounded-lg transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-amber-300"
+                                            : "bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-green-300"
+                                    )= category.isActive ? "Desactivar" : "Activar"
+
+                                //- --- Eliminar Categoría ---
+                                form(
+                                    action=`/admin/categories/${category._id}/delete`
+                                    method="POST"
+                                    class="ml-auto"
+                                )
+                                    input(type="hidden" name="_csrf" value=csrfToken)
+
+                                    button(
+                                        type="submit"
+                                        class="border border-red-500 text-red-600 hover:bg-red-600 hover:text-white font-semibold px-4 py-2 rounded-lg transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-red-300"
+                                    ) Eliminar
+
+        //- =============================================
+        //- PIE DE PÁGINA
+        //- =============================================
+
+        footer(class="border-t border-slate-900 text-center text-gray-500 text-sm p-6")
+            | Penguin Store 🐧 — Administración
