@@ -2,29 +2,145 @@ doctype html
 html(lang="es")
     head
         meta(charset="UTF-8")
-        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title= title
-        link(rel="stylesheet" href="/css/output.css")
+        link(rel="stylesheet", href="/css/styles.css")
 
-    body
-        main.container.mx-auto.p-8
-            h1.text-3xl.font-bold.mb-6 ¡Bienvenido al panel administrativo!
+    body(class="bg-slate-950 text-white min-h-screen flex flex-col")
 
-            p.mb-4
-                | Hola, #{user.email}
+        //- =============================================
+        //- ENCABEZADO
+        //- =============================================
 
-            section(class="grid grid-cols-1 md:grid-cols-2 gap-6")
-                article.p-6.rounded-lg.shadow
-                    h2.text-xl.font-bold Productos
-                    p.text-3xl= products
+        header(class="bg-slate-900 border-b border-slate-800")
 
-                article.p-6.rounded-lg.shadow
-                    h2.text-xl.font-bold Categorías
-                    p.text-3xl= categories
+            div(class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
 
-            form(action="/admin/logout" method="POST")
-                input(type="hidden" name="_csrf" value=csrfToken)
-                button(type="submit") Cerrar sesión
+                div(class="text-center sm:text-left")
+                    h1(class="text-2xl sm:text-3xl font-bold text-green-400")
+                        | Penguin Store 🐧
 
-            
-            a(href="/admin/orders") Administrar pedidos
+                    p(class="text-gray-400 text-sm mt-1")
+                        | Panel de administración
+
+                div(class="flex items-center justify-center gap-3 bg-slate-800 border border-slate-700 rounded-full pl-2 pr-5 py-2 self-center sm:self-auto")
+
+                    span(class="flex items-center justify-center w-9 h-9 rounded-full bg-green-600 text-white")
+                        | 👤
+
+                    span(class="text-sm text-gray-200 break-all")
+                        | #{user.email}
+
+        //- =============================================
+        //- CONTENIDO PRINCIPAL
+        //- =============================================
+
+        main(class="flex-1 w-full max-w-6xl mx-auto px-6 py-10")
+
+            //- ---------------------------------------------
+            //- BIENVENIDA
+            //- ---------------------------------------------
+
+            section(class="mb-12 rounded-2xl bg-linear-to-br from-slate-900 to-slate-800 border border-slate-800 p-8 sm:p-10")
+
+                h2(class="text-3xl font-bold leading-tight")
+                    | ¡Bienvenido al iglú administrativo!
+
+                p(class="text-gray-300 mt-3 max-w-xl")
+                    | Desde aquí puedes supervisar y administrar tu tienda.
+
+            //- ---------------------------------------------
+            //- ESTADÍSTICAS
+            //- ---------------------------------------------
+
+            section(class="mb-12")
+
+                h2(class="text-xl font-bold text-green-400 mb-5")
+                    | Resumen de la tienda
+
+                div(class="grid grid-cols-1 sm:grid-cols-2 gap-6")
+
+                    article(class="bg-white text-gray-900 rounded-2xl p-6 shadow-lg border-l-4 border-green-600")
+
+                        div(class="flex items-start justify-between")
+                            h3(class="text-lg font-bold text-gray-700")
+                                | Productos
+
+                            span(class="flex items-center justify-center w-12 h-12 rounded-xl bg-green-100 text-2xl")
+                                | 📦
+
+                        p(class="text-green-700 text-5xl font-extrabold mt-4")
+                            = products
+
+                        p(class="text-gray-500 text-sm mt-2")
+                            | Productos registrados en la tienda.
+
+                    article(class="bg-white text-gray-900 rounded-2xl p-6 shadow-lg border-l-4 border-sky-500")
+
+                        div(class="flex items-start justify-between")
+                            h3(class="text-lg font-bold text-gray-700")
+                                | Categorías
+
+                            span(class="flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 text-2xl")
+                                | 🗂️
+
+                        p(class="text-sky-700 text-5xl font-extrabold mt-4")
+                            = categories
+
+                        p(class="text-gray-500 text-sm mt-2")
+                            | Categorías disponibles en el catálogo.
+
+            //- ---------------------------------------------
+            //- ADMINISTRACIÓN
+            //- ---------------------------------------------
+
+            section(class="mb-12")
+
+                h2(class="text-xl font-bold text-green-400 mb-5")
+                    | Administración
+
+                div(class="grid grid-cols-1 md:grid-cols-2 gap-6")
+
+                    article(class="bg-white text-gray-900 rounded-2xl p-6 shadow-lg flex flex-col")
+
+                        span(class="flex items-center justify-center w-14 h-14 rounded-xl bg-green-100 text-3xl")
+                            | 🛍️
+
+                        h3(class="text-xl font-bold mt-4")
+                            | Pedidos
+
+                        p(class="text-gray-600 mt-2 flex-1")
+                            | Consulta las compras de tus clientes y administra las entregas.
+
+                        a(
+                            href="/admin/orders"
+                            class="inline-block text-center bg-green-600 hover:bg-green-700 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-green-300 text-white font-bold py-3 px-6 rounded-lg mt-6 transition-colors"
+                        )
+                            | Administrar pedidos
+
+            //- ---------------------------------------------
+            //- CERRAR SESIÓN
+            //- ---------------------------------------------
+
+            section(class="border-t border-slate-800 pt-8 text-center")
+
+                form(action="/admin/logout" method="POST")
+
+                    input(
+                        type="hidden"
+                        name="_csrf"
+                        value=csrfToken
+                    )
+
+                    button(
+                        type="submit"
+                        class="border border-red-500 text-red-400 hover:bg-red-600 hover:text-white focus:outline-hidden focus-visible:ring-4 focus-visible:ring-red-400/50 font-bold py-3 px-6 rounded-lg transition-colors"
+                    )
+                        | Cerrar sesión
+
+        //- =============================================
+        //- PIE DE PÁGINA
+        //- =============================================
+
+        footer(class="border-t border-slate-900 text-center text-gray-500 text-sm p-6")
+            | Penguin Store 🐧 — Administración
