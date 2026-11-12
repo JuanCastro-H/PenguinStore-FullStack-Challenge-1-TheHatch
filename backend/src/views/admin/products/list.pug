@@ -1,135 +1,167 @@
-
 doctype html
 html(lang="es")
     head
         meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         title= title
-        link(rel="stylesheet" href="/css/output.css")
+        link(rel="stylesheet" href="/css/styles.css")
 
-    body
-        main.container.mx-auto.p-8
+    body(class="bg-slate-950 text-white min-h-screen flex flex-col")
 
-            // =============================================
-            // ENCABEZADO
-            // =============================================
+        //- =============================================
+        //- ENCABEZADO
+        //- =============================================
 
-            h1.text-3xl.font-bold.mb-6 Administración de productos
+        header(class="bg-slate-900 border-b border-slate-800")
 
-            // ---------------------------------------------
-            // MENSAJES
-            // ---------------------------------------------
+            div(class="max-w-6xl mx-auto px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
 
-            if message
-                p(class="p-3 rounded border mb-4")= message
+                div(class="text-center sm:text-left")
+                    p(class="text-2xl font-bold text-green-400")
+                        | Penguin Store 🐧
 
-            p.mb-4
-                | Hola, #{user.email}
+                    p(class="text-gray-400 text-sm mt-1")
+                        | Panel de administración
 
-            // =============================================
-            // NAVEGACIÓN
-            // =============================================
+                div(class="flex items-center justify-center gap-3 bg-slate-800 border border-slate-700 rounded-full pl-2 pr-5 py-2 self-center sm:self-auto")
+
+                    span(class="flex items-center justify-center w-9 h-9 rounded-full bg-green-600 text-white")
+                        | 👤
+
+                    span(class="text-sm text-gray-200 break-all")
+                        | #{user.email}
+
+        //- =============================================
+        //- CONTENIDO PRINCIPAL
+        //- =============================================
+
+        main(class="flex-1 w-full max-w-6xl mx-auto px-6 py-10")
+
+            //- =============================================
+            //- NAVEGACIÓN Y TÍTULO
+            //- =============================================
 
             a(
                 href="/admin/dashboard"
-                class="text-blue-600 underline"
-            ) Volver al dashboard
+                class="inline-flex items-center gap-2 text-green-400 hover:text-green-300 font-semibold rounded-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-green-400 transition-colors"
+            ) ← Volver al dashboard
 
-            section.my-6
+            div(class="mt-6 mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between")
+
+                h1(class="text-3xl font-bold")
+                    | Administración de productos
+
                 a(
                     href="/admin/products/new"
-                    class="inline-block bg-blue-600 text-white px-4 py-2 rounded"
+                    class="inline-block text-center bg-green-600 hover:bg-green-700 focus:outline-hidden focus-visible:ring-4 focus-visible:ring-green-300 text-white font-bold py-3 px-6 rounded-lg transition-colors"
                 ) Crear producto
 
-            // =============================================
-            // LISTADO DE PRODUCTOS
-            // =============================================
+            //- =============================================
+            //- LISTADO DE PRODUCTOS
+            //- =============================================
 
             if products.length === 0
-                p No hay productos registrados.
+
+                div(class="bg-slate-900 border border-dashed border-slate-700 rounded-2xl p-12 text-center")
+
+                    p(class="text-5xl mb-4")
+                        | 📦
+
+                    p(class="text-xl font-bold")
+                        | No hay productos registrados.
 
             else
                 section(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
 
                     each product in products
-                        article(class="p-6 rounded-lg shadow border")
+                        article(class="bg-white text-gray-900 rounded-2xl shadow-lg overflow-hidden flex flex-col")
 
-                            // ---------------------------------------------
-                            // INFORMACIÓN DEL PRODUCTO
-                            // ---------------------------------------------
-
-                            h2.text-xl.font-bold= product.name
-
-                            p.my-2= product.description
-
-                            p
-                                strong Precio:
-                                |  #{product.price}
-
-                            p
-                                strong Stock:
-                                |  #{product.stock}
-
-                            p
-                                strong Categoría:
-                                |  #{product.category ? product.category.name : "Sin categoría"}
-
-                            p
-                                strong Estado:
-                                |  #{product.isActive ? "Activo" : "Inactivo"}
-
-                            // ---------------------------------------------
-                            // IMAGEN DEL PRODUCTO
-                            // ---------------------------------------------
+                            //- ---------------------------------------------
+                            //- IMAGEN DEL PRODUCTO
+                            //- ---------------------------------------------
 
                             if product.images && product.images.length > 0
                                 img(
                                     src=product.images[0]
                                     alt=product.name
-                                    class="w-full h-48 object-cover rounded mt-3"
+                                    class="w-full h-48 object-cover"
                                 )
                             else
-                                p.text-sm.text-gray-500.mt-3 Sin imágenes disponibles.
+                                div(class="w-full h-48 bg-gray-100 flex flex-col items-center justify-center text-gray-500")
+                                    span(class="text-4xl")
+                                        | 🖼️
 
-                            // ---------------------------------------------
-                            // EDITAR PRODUCTO
-                            // ---------------------------------------------
+                                    p(class="text-sm mt-2")
+                                        | Sin imágenes disponibles.
 
-                            a(
-                                href=`/admin/products/${product._id}/edit`
-                                class="inline-block text-blue-600 underline mt-4"
-                            ) Editar
+                            //- ---------------------------------------------
+                            //- INFORMACIÓN DEL PRODUCTO
+                            //- ---------------------------------------------
 
-                            // ---------------------------------------------
-                            // ACTIVAR / DESACTIVAR PRODUCTO
-                            // ---------------------------------------------
+                            div(class="p-6 flex-1 flex flex-col")
 
-                            form(
-                                action=`/admin/products/${product._id}/toggle-status`
-                                method="POST"
-                                class="mt-3"
-                            )
-                                input(type="hidden" name="_csrf" value=csrfToken)
+                                div(class="flex items-start justify-between gap-3")
 
-                                button(
-                                    type="submit"
-                                    class=product.isActive
-                                        ? "bg-red-600 text-white px-3 py-2 rounded"
-                                        : "bg-green-600 text-white px-3 py-2 rounded"
-                                )= product.isActive ? "Desactivar" : "Activar"
+                                    h2(class="text-xl font-bold break-words")= product.name
 
-                            // ---------------------------------------------
-                            // ELIMINAR PRODUCTO
-                            // ---------------------------------------------
+                                    if product.isActive
+                                        span(class="inline-flex items-center gap-2 bg-green-100 text-green-800 rounded-full px-3 py-1 text-xs font-bold shrink-0")
+                                            span(class="w-2 h-2 rounded-full bg-green-600")
+                                            | Activo
 
-                            form(
-                                action=`/admin/products/${product._id}/delete`
-                                method="POST"
-                                class="mt-3"
-                            )
-                                input(type="hidden" name="_csrf" value=csrfToken)
+                                    else
+                                        span(class="inline-flex items-center gap-2 bg-gray-200 text-gray-700 rounded-full px-3 py-1 text-xs font-bold shrink-0")
+                                            span(class="w-2 h-2 rounded-full bg-gray-500")
+                                            | Inactivo
 
-                                button(
-                                    type="submit"
-                                    class="bg-red-700 text-white px-3 py-2 rounded"
-                                ) Eliminar
+                                p(class="text-gray-600 mt-3 flex-1")= product.description
+
+                                div(class="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-gray-200")
+
+                                    div
+                                        p(class="text-sm text-gray-500")
+                                            | Precio
+
+                                        p(class="text-xl font-extrabold text-green-700 mt-1")
+                                            | #{product.price}
+
+                                    div
+                                        p(class="text-sm text-gray-500")
+                                            | Stock
+
+                                        p(class="text-xl font-bold mt-1")
+                                            | #{product.stock}
+
+                                p(class="mt-4 inline-flex items-center gap-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg px-3 py-2 w-fit")
+                                    | 🗂️ #{product.category ? product.category.name : "Sin categoría"}
+
+                            //- ---------------------------------------------
+                            //- ACCIONES
+                            //- ---------------------------------------------
+
+                            div(class="bg-gray-50 border-t border-gray-200 p-4 flex flex-wrap items-center gap-3")
+
+                                a(
+                                    href=`/admin/products/${product._id}/edit`
+                                    class="border border-green-600 text-green-700 hover:bg-green-600 hover:text-white font-semibold px-4 py-2 rounded-lg transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-green-300"
+                                ) Editar
+
+                                form(
+                                    action=`/admin/products/${product._id}/toggle-status`
+                                    method="POST"
+                                )
+                                    input(type="hidden" name="_csrf" value=csrfToken)
+
+                                    button(
+                                        type="submit"
+                                        class=product.isActive
+                                            ? "bg-amber-500 hover:bg-amber-600 text-gray-900 font-semibold px-4 py-2 rounded-lg transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-amber-300"
+                                            : "bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors focus:outline-hidden focus-visible:ring-4 focus-visible:ring-green-300"
+                                    )= product.isActive ? "Desactivar" : "Activar"
+
+        //- =============================================
+        //- PIE DE PÁGINA
+        //- =============================================
+
+        footer(class="border-t border-slate-900 text-center text-gray-500 text-sm p-6")
+            | Penguin Store 🐧 — Administración
