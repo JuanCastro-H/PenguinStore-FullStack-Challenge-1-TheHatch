@@ -1,4 +1,4 @@
-# Hola Primer Commit# 🐧 Penguin Store — "The Great Penguin Store Migration" 🐟🧊
+# 🐧 Penguin Store — "The Great Penguin Store Migration" 🐟🧊
 
 > "A well-organized store is like a well-organized penguin colony: everyone knows where to go."
 
